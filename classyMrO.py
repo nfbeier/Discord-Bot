@@ -26,9 +26,7 @@ class intros(commands.Cog):
         self.players = h5py.File('settings/players.h5','a')
         self.owner_name = 'thadis'
         self.mutetime = time.time()
-
-
-       
+        
     @commands.command()
     async def mute(self,ctx):
         """Enables theme song player"""
@@ -58,33 +56,6 @@ class intros(commands.Cog):
         """Tells Mr. O to join a specified voice chat"""
         await self.join_chat(ctx)    
 
-        
-
-
-
-    @commands.command()
-    async def ska(self,ctx,volume=0.25):
-        """Ska 4 Lyfe!"""
-        audiofile = 'Brooklyn 99 - Ska interview.mp3' 
-        print(audiofile)
-        channel = self.find_voicechat(ctx)
-        #print(after.channel,after)
-        print(channel) 
-        if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1,length=5,volume=volume)
-
-
-    @commands.command()
-    async def baddad(self,ctx):
-        """Learn to be a good father Maggie"""
-        audiofile = 'Maggie, Bad Dad_n.mp3' 
-        print(audiofile)
-        channel = self.find_voicechat(ctx)
-        #print(after.channel,after)
-        print(channel) 
-        if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1)
-
     @commands.command()
     async def roll(self,ctx,*args):
         print(args)  
@@ -106,71 +77,7 @@ class intros(commands.Cog):
             splitstr[ii] = splitstr[ii].split('-')
         output = ''
         result = 0
-
-
-        for ii, dicelist in enumerate(splitstr):
-            for jj, dicestring in enumerate(dicelist):
-                if dicestring.find('d') != -1:
-                    roll = diceRoller(dicestring)
-                else:
-                    roll = np.array([int(dicestring)])
-                if jj == 0:
-                    result += np.sum(roll)
-                    if ii == 0:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+='(%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                    else:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+=' + (%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                else:
-                    result -= np.sum(roll)
-                    if ii == 0:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+='(%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                    else:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+=' - (%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-        print(str(result) + ' = ' + output)
- 
-        await ctx.send('Total: %d    Breakdown: %s'%(result,output))
-
-
-    @commands.command()
-    async def nice(self,ctx):
-        """Nice"""
-        audiofile = 'CLICK Nice.mp3' 
-        print(audiofile)
-        channel = self.find_voicechat(ctx)
-        #print(after.channel,after)
-        print(channel) 
-        if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1)
-
-    @commands.command()
-    async def coldone(self,ctx):
-        """Poppin' one open"""
-        await self.nice(ctx)
-    
-    @commands.command()
+ @commands.command()
     async def play(self,ctx,playerID=None):
         """Players theme song for user or whoever they @"""
         if playerID is not None:
@@ -266,31 +173,6 @@ class intros(commands.Cog):
                 if member==ctx.author:
                     return channel
         return None
-
-
-
- #   @commands.command()
-#    async def shoutout(self,ctx):
-        
-    @commands.command()
-    async def shoutout(self,ctx,duration=1.5):
-        """Gives Mr. O a shoutout"""
-        print(ctx.channel)
-        print(ctx.guild)
-        print(ctx.guild.voice_channels)
-        if self.players[ctx.author.name + '/mod'].value == 0 and duration > 3.0:
-            duration = 3.0
-        if duration >39.0:
-            duration = 39.0
-        
-        channel = self.find_voicechat(ctx)
- 
-        voice = await channel.connect(timeout=1.0)
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('audio/Mr. O.mp3' ),volume=0.5)
-        voice.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-           
-        await asyncio.sleep(duration)
-        await voice.disconnect()
                 
     @commands.command()
     async def mod(self,ctx,player,status=1):
@@ -345,6 +227,119 @@ class intros(commands.Cog):
 
                 print(after.channel,after)
                 await self.play_clip(after.channel,audiofile,volume,length)
+    #~~~~~~~Audio Clip Commands~~~~~~~~~
+    @commands.command()
+    async def ska(self,ctx,volume=0.25):
+        """Ska 4 Lyfe!"""
+        audiofile = 'Brooklyn 99 - Ska interview.mp3' 
+        print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1,length=5,volume=volume)
+
+    @commands.command()
+    async def baddad(self,ctx):
+        """Learn to be a good father Maggie"""
+        audiofile = 'Maggie, Bad Dad_n.mp3' 
+        print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1)
+
+
+
+        for ii, dicelist in enumerate(splitstr):
+            for jj, dicestring in enumerate(dicelist):
+                if dicestring.find('d') != -1:
+                    roll = diceRoller(dicestring)
+                else:
+                    roll = np.array([int(dicestring)])
+                if jj == 0:
+                    result += np.sum(roll)
+                    if ii == 0:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+='(%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                    else:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+=' + (%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                else:
+                    result -= np.sum(roll)
+                    if ii == 0:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+='(%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                    else:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+=' - (%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+        print(str(result) + ' = ' + output)
+ 
+        await ctx.send('Total: %d    Breakdown: %s'%(result,output))
+
+
+    @commands.command()
+    async def nice(self,ctx):
+        """Nice"""
+        audiofile = 'CLICK Nice.mp3' 
+        print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1)
+
+    @commands.command()
+    async def coldone(self,ctx):
+        """Poppin' one open"""
+        await self.nice(ctx)
+    
+   
+
+
+ #   @commands.command()
+#    async def shoutout(self,ctx):
+        
+    @commands.command()
+    async def shoutout(self,ctx,duration=1.5):
+        """Gives Mr. O a shoutout"""
+        print(ctx.channel)
+        print(ctx.guild)
+        print(ctx.guild.voice_channels)
+        if self.players[ctx.author.name + '/mod'].value == 0 and duration > 3.0:
+            duration = 3.0
+        if duration >39.0:
+            duration = 39.0
+        
+        channel = self.find_voicechat(ctx)
+ 
+        voice = await channel.connect(timeout=1.0)
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('audio/Mr. O.mp3' ),volume=0.5)
+        voice.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+           
+        await asyncio.sleep(duration)
+        await voice.disconnect()
+
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
 
