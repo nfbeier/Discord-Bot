@@ -22,16 +22,16 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"),
 class intros(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.enabled = True
+        self.muted = True
         self.players = h5py.File('settings/players.h5','a')
         self.owner_name = 'thadis'
-        self.enabletime = time.time()
+        self.mutetime = time.time()
    
     @commands.command()
-    async def enable(self,ctx):
+    async def mute(self,ctx):
         """Enables theme song player"""
-        self.enabled = True
-        self.enabletime = 1.0
+        self.muted = True
+        self.mutetime = 1.0
 
     @commands.command()
     async def ban(self,ctx, otherName=''):
@@ -43,13 +43,13 @@ class intros(commands.Cog):
 
 
     @commands.command()
-    async def disable(self,ctx,duration=-1):
+    async def unmute(self,ctx,duration=-1):
         """Disables theme song player. Additional augment will disable it for that many seconds"""
-        self.enabled = False
+        self.muted = False
         if duration > 0:
-            self.enabletime = time.time() + duration
+            self.mutetime = time.time() + duration
         else:
-            self.enabletime = -1.0
+            self.mutetime = -1.0
 
     @commands.command()
     async def join(self,ctx):
@@ -405,12 +405,12 @@ class intros(commands.Cog):
         length = player['length']
         print(volume)
         print(length) 
-        if time.time() > self.enabletime and self.enabletime>0:
-            self.enabled = True
+        if time.time() > self.mutetime and self.mutetime>0:
+            self.muted = True
         else:
-            self.enabled = False
+            self.muted = False
 
-        if self.enabled == True:
+        if self.muted == True:
 
             if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
                 audiofile = self.find_audio(member)
