@@ -215,6 +215,52 @@ class intros(commands.Cog):
             splitstr[ii] = splitstr[ii].split('-')
         output = ''
         result = 0
+        
+        for ii, dicelist in enumerate(splitstr):
+            for jj, dicestring in enumerate(dicelist):
+                if dicestring.find('d') != -1:
+                    roll = diceRoller(dicestring)
+                else:
+                    roll = np.array([int(dicestring)])
+                if jj == 0:
+                    result += np.sum(roll)
+                    if ii == 0:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+='(%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                    else:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+=' + (%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                else:
+                    result -= np.sum(roll)
+                    if ii == 0:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+='(%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+
+                    else:
+                        for kk,num in enumerate(roll):
+                            if kk == 0:
+                                output+=' - (%d'%num
+                            else:
+                                output += ' + %d'%num
+                        output += ')'
+        print(str(result) + ' = ' + output)
+ 
+        await ctx.send('Total: %d    Breakdown: %s'%(result,output))
+
     
     #~~~~~~~Audio Clip Commands~~~~~~~~~
     #any command that mainly just plays audio files
@@ -264,50 +310,6 @@ class intros(commands.Cog):
 
 
 
-        for ii, dicelist in enumerate(splitstr):
-            for jj, dicestring in enumerate(dicelist):
-                if dicestring.find('d') != -1:
-                    roll = diceRoller(dicestring)
-                else:
-                    roll = np.array([int(dicestring)])
-                if jj == 0:
-                    result += np.sum(roll)
-                    if ii == 0:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+='(%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                    else:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+=' + (%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                else:
-                    result -= np.sum(roll)
-                    if ii == 0:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+='(%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-
-                    else:
-                        for kk,num in enumerate(roll):
-                            if kk == 0:
-                                output+=' - (%d'%num
-                            else:
-                                output += ' + %d'%num
-                        output += ')'
-        print(str(result) + ' = ' + output)
- 
-        await ctx.send('Total: %d    Breakdown: %s'%(result,output))
 
 
     @commands.command()
