@@ -122,29 +122,18 @@ class intros(commands.Cog):
     @commands.command()
     async def length(self, ctx,length: float, player=''):
         """Changes length of song played"""
-        if len(player) == 0:
-            name = ctx.author.name
-        else:
-            name = player
-        
-        try:
-            self.players[name]
-        except KeyError:
-            self.create_profile(name)
-        if self.players[ctx.author.name+'/mod'].value == True:
-            self.players[name+'/length'][...] = length
+        player = find_name(self,ctx,playerID=None)
+        update_profile(player)
+        update_profile(ctx.author.name)
+            
+        modStatus = self.players[ctx.author.name + '/mod'][...]
+
+        if modStatus:
+            update_key(player,'length',status==length)
             await ctx.send('Play Length set to %0.1f seconds for %s'%(self.players[name+'/length'].value,name))
         else:
             await ctx.send('Need mod privileges to change clip length')
-
-
-
-
-
-
-        #voice = await after.channel.move_to)     
-
-                
+               
     @commands.command()
     async def mod(self,ctx,playerID=None,status=1):
         """Mods a player"""
