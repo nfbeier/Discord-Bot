@@ -424,16 +424,12 @@ class intros(commands.Cog):
         self.create_key(name,'ban',False)
         self.create_key(name,'ban_count',0)
         self.create_key(name,'enable_play',1)
-        print('New Proile Created for %s'%name)        
+        #print('New Proile Created for %s'%name)        
 
 
     def user_settings(self,name):
         #returns all of the users settings in a dictionary
-        try: 
-            self.players[name]
-        except KeyError:
-            print('New User. Profile Created')
-            self.create_profile(name)
+        self.update_profile(name)
         dic = {}
         for key in self.players[name].keys():
             print(key)
