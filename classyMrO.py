@@ -27,6 +27,8 @@ class intros(commands.Cog):
         self.owner_name = 'thadis'
         self.mutetime = time.time()
         
+     #~~~~~~~~~~Bot Commands~~~~~~~~~~~
+    #Commands directly interacting with the bot's settings.
     @commands.command()
     async def mute(self,ctx):
         """Enables theme song player"""
@@ -41,10 +43,7 @@ class intros(commands.Cog):
             self.mutetime = time.time() + duration
         else:
             self.mutetime = -1.0
-
-
-
-
+            
     @commands.command()
     async def join(self,ctx):
         """Tells Mr. O to join a specified voice chat"""
@@ -67,8 +66,42 @@ class intros(commands.Cog):
         print(message.split('!')[-1].split('>')[0])
         print(bot.get_all_members())
         #print(discord.utils.get(bot.get_all_members(),id=int(message.split('!')[-1].split('>')[0])).split('#')[0])
+    @commands.command()
+    async def dc(self, ctx):
+        """Stops and disconnects the bot from oice"""
 
+        await ctx.voice_client.disconnect()
+    @commands.Cog.listener()
+    async def on_voice_state_update(self,member: discord.Member,before, after):
+        #print(after.channel)      
+        #print(bot.voice_clients)
+        print(member.name)
 
+        player = self.user_settings(member.name)        
+        print(player.keys())
+        volume = player['volume']
+        length = player['length']
+        print(volume)
+        print(length) 
+        if time.time() > self.mutetime and self.mutetime>0:
+            self.muted = True
+        else:
+            self.muted = False
+
+        if self.muted == True:
+
+            if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
+                audiofile = self.find_audio(member)
+
+                print(after.channel,after)
+                await self.play_clip(after.channel,audiofile,volume,length)
+     def find_voicechat(self,ctx):
+        for channel in ctx.guild.voice_channels:
+            for member in channel.members:
+                if member==ctx.author:
+                    return channel
+        return None               
+    #~~~~~~~~~~~Player Profile Commands    
     @commands.command()
     async def volume(self, ctx,volume: float, player=''):
         """Changes the player's volume. Value relative to 1.0"""
@@ -84,8 +117,6 @@ class intros(commands.Cog):
             self.create_profile(name)
         self.players[name+'/volume'][...] = volume
         await ctx.send('Volume set to %0.2f for %s'%(self.players[name+'/volume'].value,name))
-
-
 
 
     @commands.command()
@@ -107,11 +138,6 @@ class intros(commands.Cog):
             await ctx.send('Need mod privileges to change clip length')
 
 
-    @commands.command()
-    async def dc(self, ctx):
-        """Stops and disconnects the bot from oice"""
-
-        await ctx.voice_client.disconnect()
 
 
 
@@ -148,36 +174,7 @@ class intros(commands.Cog):
 
 
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self,member: discord.Member,before, after):
-        #print(after.channel)      
-        #print(bot.voice_clients)
-        print(member.name)
 
-        player = self.user_settings(member.name)        
-        print(player.keys())
-        volume = player['volume']
-        length = player['length']
-        print(volume)
-        print(length) 
-        if time.time() > self.mutetime and self.mutetime>0:
-            self.muted = True
-        else:
-            self.muted = False
-
-        if self.muted == True:
-
-            if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
-                audiofile = self.find_audio(member)
-
-                print(after.channel,after)
-                await self.play_clip(after.channel,audiofile,volume,length)
-     def find_voicechat(self,ctx):
-        for channel in ctx.guild.voice_channels:
-            for member in channel.members:
-                if member==ctx.author:
-                    return channel
-        return None               
                 
     #~~~~~~~Player Functions~~~~~~~~~~~~
     #Functions that have minimal interaction with the rest of the program
