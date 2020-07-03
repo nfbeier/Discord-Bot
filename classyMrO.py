@@ -148,34 +148,19 @@ class intros(commands.Cog):
     @commands.command()
     async def mod(self,ctx,playerID=None,status=1):
         """Mods a player"""
-        player_settings = self.find_profile(ctx,playerID=playerID)       
-
-        if len(player) == 0:
-            await ctx.send('No player name given')
-        try:
-            self.players[player]
-        except KeyError:
-            self.create_profile(player)
-
-
-        try:
-            modStatus = self.players[ctx.author.name+'/mod'].value
-            if ctx.author.name == self.owner_name:
-                modStatus = True
-        except KeyError:
-            self.create_profile(ctx.author.name)
-            modStatus = False
-        print('%s Mod Status: ',ctx.author.name,modStatus)
+        player = find_name(self,ctx,playerID=None)
+        update_profile(player)
+        update_profile(ctx.author.name)
+            
+        modStatus = self.players[ctx.author.name + '/mod'][...]
+        if ctx.author.name == self.owner_name:
+            modStatus = True
+        
         if modStatus:
             try:
-                self.players[player+'/mod'][...] = (status == 1)
+                update_key(player,'mod',status==1)
             except KeyError:
                 await ctx.send('Invalid username')
-        print(self.players[player+'/mod'].value)
-
-
-
-
 
                 
     #~~~~~~~Player Functions~~~~~~~~~~~~
@@ -352,14 +337,17 @@ class intros(commands.Cog):
 
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
+    
+    def find_name(self,ctx,playerID=None):
+        if playerID is not None:
+            name = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
+        else:
+            name = ctx.author
+        return name
+    
     def find_profile(self,ctx,playerID=None):
         #Finds the correct profile name for the player that was @ed
-        if playerID is not None:
-            player = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
-        else:
-            player = ctx.author
-        print(player)
-        
+        player = self.find_name(ctx,playerID=playerID)        
         player_settings = self.user_settings(player.name) 
         return player_settings
     
@@ -414,7 +402,9 @@ class intros(commands.Cog):
             self.players.create_dataset(name+'/' + key,data=default)
         except RuntimeError:
             print('Key already exists')
-    
+            
+    def update_key(self,name,key,value):
+        self.players[name+'/'+key] = value
 
     def create_profile(self,name):
         # Creates a profile for the user
