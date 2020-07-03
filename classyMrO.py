@@ -146,8 +146,10 @@ class intros(commands.Cog):
 
                 
     @commands.command()
-    async def mod(self,ctx,player,status=1):
+    async def mod(self,ctx,playerID=None,status=1):
         """Mods a player"""
+        player_settings = self.find_profile(ctx,playerID=playerID)       
+
         if len(player) == 0:
             await ctx.send('No player name given')
         try:
@@ -267,13 +269,7 @@ class intros(commands.Cog):
     @commands.command()
     async def play(self,ctx,playerID=None):
         """Players theme song for user or whoever they @"""
-        if playerID is not None:
-            player = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
-        else:
-            player = ctx.author
-        print(player)
-        
-        player_settings = self.user_settings(player.name)        
+        player_settings = self.find_profile(ctx,playerID=playerID)       
         #print(player.keys())
         volume = player_settings['volume']
         length = player_settings['length']
@@ -356,9 +352,19 @@ class intros(commands.Cog):
 
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
-
+    def find_profile(self,ctx,playerID=None):
+        #Finds the correct profile name for the player that was @ed
+        if playerID is not None:
+            player = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
+        else:
+            player = ctx.author
+        print(player)
+        
+        player_settings = self.user_settings(player.name) 
+        return player_settings
+    
     def find_audio(self,member):
-
+        #Finds the audio file associated with the correct player
         audiofile = ''
         print(member.name)
         print(member.display_name)
@@ -380,6 +386,7 @@ class intros(commands.Cog):
         return audiofile
 
     async def play_clip(self,channel,audiofile,volume=0.25,length=3.0,min_members=1):
+        #players an audio clip to the correct channel 
         print(len(channel.members))
         if len(channel.members) > min_members:
             print('playing clip ' + audiofile)
@@ -394,7 +401,7 @@ class intros(commands.Cog):
 
 
     async def join_chat(self, ctx):
-        """Joins a voice channel"""
+        #Joins a voice channel
         print(ctx.voice_client)
         if ctx.voice_client is not None:
             return await ctx.voice_client.move_to(self.find_voicechat(ctx))
@@ -402,6 +409,7 @@ class intros(commands.Cog):
         await channel.connect()
 
     def create_key(self,name, key, default):
+        #adds a new setting to a player's settings. If it already exists is does nothing.
         try:
             self.players.create_dataset(name+'/' + key,data=default)
         except RuntimeError:
@@ -409,15 +417,18 @@ class intros(commands.Cog):
     
 
     def create_profile(self,name):
+        # Creates a profile for the user
         self.create_key(name,'volume',0.5)
         self.create_key(name,'mod',False)
         self.create_key(name,'length',3.0)
         self.create_key(name,'ban',False)
         self.create_key(name,'ban_count',0)
+        self.create_key(name,'enable_play',1)
         print('New Proile Created for %s'%name)        
 
 
     def user_settings(self,name):
+        #returns all of the users settings in a dictionary
         try: 
             self.players[name]
         except KeyError:
@@ -430,12 +441,14 @@ class intros(commands.Cog):
         return dic
 
     def update_profile(self,name):
+        # Updates a profile to contain all new default settings.
+        # Preserves all old keys
         old_settings = self.user_settings(name)
 
         self.create_profile(name)
         
         for key in old_settings.keys():
-            self.players[name+'/'+key][...] = dic[key]    
+            self.players[name+'/'+key][...] = old_settings[key]    
 
 
 
