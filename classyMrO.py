@@ -26,21 +26,14 @@ class intros(commands.Cog):
         self.players = h5py.File('settings/players.h5','a')
         self.owner_name = 'thadis'
         self.mutetime = time.time()
-   
+
+
+       
     @commands.command()
     async def mute(self,ctx):
         """Enables theme song player"""
         self.muted = True
         self.mutetime = 1.0
-
-    @commands.command()
-    async def ban(self,ctx, otherName=''):
-        """He knows what he did."""
-        if ctx.author.name == "Kataki" and otherName == '':
-            await ctx.send('Good that you know your place')
-        else:
-            await ctx.send('Kataki Banned')
-
 
     @commands.command()
     async def unmute(self,ctx,duration=-1):
@@ -52,18 +45,22 @@ class intros(commands.Cog):
             self.mutetime = -1.0
 
     @commands.command()
+    async def ban(self,ctx, otherName=''):
+        """He knows what he did."""
+        if ctx.author.name == "Kataki" and otherName == '':
+            await ctx.send('Good that you know your place')
+        else:
+            await ctx.send('Kataki Banned')
+
+
+    @commands.command()
     async def join(self,ctx):
         """Tells Mr. O to join a specified voice chat"""
         await self.join_chat(ctx)    
+
         
 
-    async def join_chat(self, ctx):
-        """Joins a voice channel"""
-        print(ctx.voice_client)
-        if ctx.voice_client is not None:
-            return await ctx.voice_client.move_to(self.find_voicechat(ctx))
-        channel = self.find_voicechat(ctx)
-        await channel.connect()
+
 
     @commands.command()
     async def ska(self,ctx,volume=0.25):
@@ -270,41 +267,7 @@ class intros(commands.Cog):
                     return channel
         return None
 
-    def create_key(self,name, key, default):
-        try:
-            self.players.create_dataset(name+'/' + key,data=default)
-        except RuntimeError:
-            print('Key already exists')
-    
 
-    def create_profile(self,name):
-        self.create_key(name,'volume',0.5)
-        self.create_key(name,'mod',False)
-        self.create_key(name,'length',3.0)
-        self.create_key(name,'ban',False)
-        self.create_key(name,'ban_count',0)
-        print('New Proile Created for %s'%name)        
-
-
-    def user_settings(self,name):
-        try: 
-            self.players[name]
-        except KeyError:
-            print('New User. Profile Created')
-            self.create_profile(name)
-        dic = {}
-        for key in self.players[name].keys():
-            print(key)
-            dic[key] = self.players[name][key].value
-        return dic
-
-    def update_profile(self,name):
-        old_settings = self.user_settings(name)
-
-        self.create_profile(name)
-        
-        for key in old_settings.keys():
-            self.players[name+'/'+key][...] = dic[key]    
 
  #   @commands.command()
 #    async def shoutout(self,ctx):
@@ -355,6 +318,36 @@ class intros(commands.Cog):
                 await ctx.send('Invalid username')
         print(self.players[player+'/mod'].value)
 
+
+
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self,member: discord.Member,before, after):
+        #print(after.channel)      
+        #print(bot.voice_clients)
+        print(member.name)
+
+        player = self.user_settings(member.name)        
+        print(player.keys())
+        volume = player['volume']
+        length = player['length']
+        print(volume)
+        print(length) 
+        if time.time() > self.mutetime and self.mutetime>0:
+            self.muted = True
+        else:
+            self.muted = False
+
+        if self.muted == True:
+
+            if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
+                audiofile = self.find_audio(member)
+
+                print(after.channel,after)
+                await self.play_clip(after.channel,audiofile,volume,length)
+
+    #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
+
     def find_audio(self,member):
 
         audiofile = ''
@@ -391,32 +384,49 @@ class intros(commands.Cog):
 
 
 
+    async def join_chat(self, ctx):
+        """Joins a voice channel"""
+        print(ctx.voice_client)
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(self.find_voicechat(ctx))
+        channel = self.find_voicechat(ctx)
+        await channel.connect()
+
+    def create_key(self,name, key, default):
+        try:
+            self.players.create_dataset(name+'/' + key,data=default)
+        except RuntimeError:
+            print('Key already exists')
+    
+
+    def create_profile(self,name):
+        self.create_key(name,'volume',0.5)
+        self.create_key(name,'mod',False)
+        self.create_key(name,'length',3.0)
+        self.create_key(name,'ban',False)
+        self.create_key(name,'ban_count',0)
+        print('New Proile Created for %s'%name)        
 
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self,member: discord.Member,before, after):
-        #print(after.channel)      
-        #print(bot.voice_clients)
-        print(member.name)
+    def user_settings(self,name):
+        try: 
+            self.players[name]
+        except KeyError:
+            print('New User. Profile Created')
+            self.create_profile(name)
+        dic = {}
+        for key in self.players[name].keys():
+            print(key)
+            dic[key] = self.players[name][key].value
+        return dic
 
-        player = self.user_settings(member.name)        
-        print(player.keys())
-        volume = player['volume']
-        length = player['length']
-        print(volume)
-        print(length) 
-        if time.time() > self.mutetime and self.mutetime>0:
-            self.muted = True
-        else:
-            self.muted = False
+    def update_profile(self,name):
+        old_settings = self.user_settings(name)
 
-        if self.muted == True:
-
-            if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
-                audiofile = self.find_audio(member)
-
-                print(after.channel,after)
-                await self.play_clip(after.channel,audiofile,volume,length)
+        self.create_profile(name)
+        
+        for key in old_settings.keys():
+            self.players[name+'/'+key][...] = dic[key]    
 
 
 
