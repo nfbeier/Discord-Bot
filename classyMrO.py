@@ -42,13 +42,7 @@ class intros(commands.Cog):
         else:
             self.mutetime = -1.0
 
-    @commands.command()
-    async def ban(self,ctx, otherName=''):
-        """He knows what he did."""
-        if ctx.author.name == "Kataki" and otherName == '':
-            await ctx.send('Good that you know your place')
-        else:
-            await ctx.send('Kataki Banned')
+
 
 
     @commands.command()
@@ -56,48 +50,8 @@ class intros(commands.Cog):
         """Tells Mr. O to join a specified voice chat"""
         await self.join_chat(ctx)    
 
-    @commands.command()
-    async def roll(self,ctx,*args):
-        print(args)  
-        diceString = ''
-        for ele in args:
-            diceString += ele
-        import numpy as np
 
-        def diceRoller(diceString):
-            a = diceString.split('d')
-            numDice = int(a[0])
-            diceSize = int(a[1])
 
-            roll = np.random.randint(1,diceSize+1,numDice)
-            return roll
-        diceString = diceString.replace(' ','')
-        splitstr = diceString.split('+')
-        for ii in range(len(splitstr)):
-            splitstr[ii] = splitstr[ii].split('-')
-        output = ''
-        result = 0
- @commands.command()
-    async def play(self,ctx,playerID=None):
-        """Players theme song for user or whoever they @"""
-        if playerID is not None:
-            player = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
-        else:
-            player = ctx.author
-        print(player)
-        
-        player_settings = self.user_settings(player.name)        
-        #print(player.keys())
-        volume = player_settings['volume']
-        length = player_settings['length']
-        
-        audiofile = self.find_audio(player)
-        #print(audiofile)
-        channel = self.find_voicechat(ctx)
-        #print(after.channel,after)
-        #print(channel) 
-        if channel is not None:
-            await self.play_clip(channel,audiofile,volume=volume,length=length)
     
     @commands.command()
     async def gotobed(self,ctx):
@@ -163,16 +117,7 @@ class intros(commands.Cog):
 
 
         #voice = await after.channel.move_to)     
-    @commands.command()
-    async def ban_count(self,ctx):
-        self.update_profile('Kataki')
-        print(self.players['Kataki/ban_count'])        
-    def find_voicechat(self,ctx):
-        for channel in ctx.guild.voice_channels:
-            for member in channel.members:
-                if member==ctx.author:
-                    return channel
-        return None
+
                 
     @commands.command()
     async def mod(self,ctx,player,status=1):
@@ -227,7 +172,77 @@ class intros(commands.Cog):
 
                 print(after.channel,after)
                 await self.play_clip(after.channel,audiofile,volume,length)
+     def find_voicechat(self,ctx):
+        for channel in ctx.guild.voice_channels:
+            for member in channel.members:
+                if member==ctx.author:
+                    return channel
+        return None               
+                
+    #~~~~~~~Player Functions~~~~~~~~~~~~
+    #Functions that have minimal interaction with the rest of the program
+    #and are mainly standalone functions.
+    @commands.command()
+    async def ban(self,ctx, otherName=''):
+        """He knows what he did."""
+        if ctx.author.name == "Kataki" and otherName == '':
+            await ctx.send('Good that you know your place')
+        else:
+            await ctx.send('Kataki Banned')
+            
+    @commands.command()
+    async def ban_count(self,ctx):
+        self.update_profile('Kataki')
+        print(self.players['Kataki/ban_count'])        
+        
+
+    
+    @commands.command()
+    async def roll(self,ctx,*args):
+        print(args)  
+        diceString = ''
+        for ele in args:
+            diceString += ele
+        import numpy as np
+
+        def diceRoller(diceString):
+            a = diceString.split('d')
+            numDice = int(a[0])
+            diceSize = int(a[1])
+
+            roll = np.random.randint(1,diceSize+1,numDice)
+            return roll
+        diceString = diceString.replace(' ','')
+        splitstr = diceString.split('+')
+        for ii in range(len(splitstr)):
+            splitstr[ii] = splitstr[ii].split('-')
+        output = ''
+        result = 0
+    
     #~~~~~~~Audio Clip Commands~~~~~~~~~
+    #any command that mainly just plays audio files
+    @commands.command()
+    async def play(self,ctx,playerID=None):
+        """Players theme song for user or whoever they @"""
+        if playerID is not None:
+            player = discord.utils.get(ctx.guild.members,id=int(playerID.split('!')[-1].split('>')[0]))
+        else:
+            player = ctx.author
+        print(player)
+        
+        player_settings = self.user_settings(player.name)        
+        #print(player.keys())
+        volume = player_settings['volume']
+        length = player_settings['length']
+        
+        audiofile = self.find_audio(player)
+        #print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        #print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,volume=volume,length=length)
+            
     @commands.command()
     async def ska(self,ctx,volume=0.25):
         """Ska 4 Lyfe!"""
