@@ -103,34 +103,29 @@ class intros(commands.Cog):
         return None               
     #~~~~~~~~~~~Player Profile Commands    
     @commands.command()
-    async def volume(self, ctx,volume: float, player=''):
+    async def volume(self, ctx,volume: float, playerID=None):
         """Changes the player's volume. Value relative to 1.0"""
-        if len(player) == 0:
-            name = ctx.author.name
+        player = find_name(self,ctx,playerID=None)
+        update_profile(player)
+        update_profile(ctx.author.name)       
+        modStatus = self.players[ctx.author.name + '/mod'][...]
+        if modStatus or (ctx.author.name == player):
+            self.players[player+'/volume'][...] = volume
+            await ctx.send('Volume set to %0.2f for %s'%(self.players[player+'/volume'].value,player))
         else:
-            name = player
-        print(name)
-        self.update_profile(name)
-        try:
-            self.players[name]
-        except KeyError:
-            self.create_profile(name)
-        self.players[name+'/volume'][...] = volume
-        await ctx.send('Volume set to %0.2f for %s'%(self.players[name+'/volume'].value,name))
-
+            await ctx.send("Need mod status to change someone else's volume")
 
     @commands.command()
     async def length(self, ctx,length: float, player=''):
         """Changes length of song played"""
         player = find_name(self,ctx,playerID=None)
         update_profile(player)
-        update_profile(ctx.author.name)
-            
+        update_profile(ctx.author.name)       
         modStatus = self.players[ctx.author.name + '/mod'][...]
 
         if modStatus:
             update_key(player,'length',status==length)
-            await ctx.send('Play Length set to %0.1f seconds for %s'%(self.players[name+'/length'].value,name))
+            await ctx.send('Play Length set to %0.1f seconds for %s'%(self.players[player+'/length'].value,player))
         else:
             await ctx.send('Need mod privileges to change clip length')
                
