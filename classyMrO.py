@@ -95,7 +95,9 @@ class intros(commands.Cog):
 
                 print(after.channel,after)
                 await self.play_clip(after.channel,audiofile,volume,length)
-     def find_voicechat(self,ctx):
+                
+                
+    def find_voicechat(self,ctx):
         for channel in ctx.guild.voice_channels:
             for member in channel.members:
                 if member==ctx.author:
@@ -292,12 +294,6 @@ class intros(commands.Cog):
     async def coldone(self,ctx):
         """Poppin' one open"""
         await self.nice(ctx)
-    
-   
-
-
- #   @commands.command()
-#    async def shoutout(self,ctx):
         
     @commands.command()
     async def shoutout(self,ctx,duration=1.5):
