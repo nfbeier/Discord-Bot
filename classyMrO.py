@@ -359,20 +359,27 @@ class intros(commands.Cog):
     @commands.command()
     async def displaySettings(self,ctx,playerID=None):
         player_settings = self.find_profile(ctx,playerID)
- 
+        modStatus = self.is_mod(ctx.author.name) 
         name = self.find_name(ctx,playerID).name
-        print('~~~~~~~~~~~~~~~~')
-        print('Settings for ', name) 
-        for key in player_settings.keys():
-            print(key,player_settings[key])
-        print('~~~~~~~~~~~~~~~~')    
-
+        if playerID == None:
+            message = '.\n'
+            message += 'Settings for %s\n'%name 
+            for key in player_settings.keys():
+                message += '%s: %s\n'%(key,str(player_settings[key]))         
+            await ctx.author.send(message)
+        elif modStatus == True or ctx.author.name == name:
+            message = '.\n'
+            message += 'Settings for %s\n'%name 
+            for key in player_settings.keys():
+                message += '%s: %s\n'%(key,str(player_settings[key]))         
+            await ctx.author.send(message)
 
     @commands.command()
     async def update(self,ctx,playerID=None):
-        name = self.find_name(ctx,playerID).name
-        self.update_profile(name)
-        print("Updated %s's profile"%name)
+        if self.is_mod(ctx.author.name):
+            name = self.find_name(ctx,playerID).name
+            self.update_profile(name)
+            print("Updated %s's profile"%name)
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
     
@@ -467,6 +474,9 @@ class intros(commands.Cog):
         self.create_key(name,'bancount',0)
         self.create_key(name,'enable_play',1)
         #print('New Proile Created for %s'%name)        
+
+    def is_mod(self,name):
+        return self.players[name+'/mod'][...]
 
     def user_settings(self,name):
         #returns all of the users settings in a dictionary
