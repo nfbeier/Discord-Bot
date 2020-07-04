@@ -143,9 +143,6 @@ class intros(commands.Cog):
             
         modStatus = self.players[ctx.author.name + '/mod'][...]
         if ctx.author.name == self.owner_name:
-            modStatus = True
-        
-        if modStatus:
             try:
      #           print(self.players[player.name + '/mod'][...])
                 self.update_key(player.name,'mod',status==1)
