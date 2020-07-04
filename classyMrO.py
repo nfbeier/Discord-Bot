@@ -10,6 +10,7 @@ from discord.ext import commands
 from gtts import gTTS
 import h5py
 import time
+from datetime import datetime
 # Suppress noise about console usage from errors
 ffmpeg_options = {
     'options': '-vn'
@@ -59,7 +60,7 @@ class intros(commands.Cog):
             await ctx.bot.logout()
    
     @commands.command()
-    async def test(self,ctx,message):
+    async def test(self,ctx):
         """Test"""
         if ctx.author.name == 'thadis':
             print(message)
@@ -112,6 +113,9 @@ class intros(commands.Cog):
     async def currentvolume(self, ctx, playerID=None):
         """
             Inputs: @player"""
+       # await bot.delete_message(ctx)
+
+        await ctx.message.delete()
         player = self.find_name(ctx,playerID=playerID)
       #  print(player.name)
         self.update_profile(player.name)
@@ -121,6 +125,7 @@ class intros(commands.Cog):
     @commands.command()
     async def volume(self, ctx,volume: float, playerID=None):
         """ Inputs: <desired volume> <@player>optional"""
+        await ctx.message.delete()
         player = self.find_name(ctx,playerID=playerID)
       #  print(player.name)
         self.update_profile(player.name)
@@ -136,6 +141,7 @@ class intros(commands.Cog):
     @commands.command()
     async def length(self, ctx,length: float, playerID=None):
         """Inputs: <desired length> <@player>optional   MODS ONLY"""
+        await ctx.message.delete()
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
         self.update_profile(ctx.author.name)       
@@ -175,26 +181,49 @@ class intros(commands.Cog):
     @commands.command()
     async def ban(self,ctx, playerID=None):
         """Inputs: <@player>optional"""
+        await ctx.message.delete()
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
         self.players[player.name + '/bancount'][...] += 1
 
-        if ctx.author.name == "Kataki" and otherName == '':
-            await ctx.send('Good that you know your place')
+        if ctx.author.name == "Kataki" and player == 'Kataki':
+            await ctx.send('Good that you know your place Kataki')
         else:
-            await ctx.send('%s Banned'%player.name)
+            await ctx.send('%s Banned by %s'%(player.name,ctx.author.name))
             
     @commands.command()
     async def bancount(self,ctx,playerID=None):
         """Inputs: <@playerID>optional""" 
+        await ctx.message.delete()
         name = self.find_name(ctx,playerID).name
         self.update_profile(name)
         await ctx.send('%s has been banned %d times.'%(name,self.players[name + '/bancount'][...]))                
 
-    
+    @commands.command()
+    async def nicknames(self,ctx,playerID=None,length=5):
+        await ctx.message.delete()
+        name = self.find_name(ctx,playerID).name
+        message = '~~~~~\n'
+        message += 'Nicknames for '+name + '\n'
+        fileName = 'logs/nicknames/'+name.replace(' ','_') +'_nicknames_'+ctx.guild.name.replace(' ','_') + '.dat'
+        if os.path.exists(fileName):
+            with open(fileName,'r') as f:
+                lines = f.readlines()
+                if len(lines) < length:
+                    length = len(lines)
+            
+                for ii in range(length):
+                    splitline = lines[-(ii+1)].replace('\n','').split('\t')
+
+                    message += splitline[0] + '\t' + splitline[2] +'\n'
+            await ctx.send(message)
+        
+
+        
     @commands.command()
     async def roll(self,ctx,*args):
         """Inputs: Dice roll represented in terms of XdY+AxB-Z"""  
+        #await ctx.message.delete()
         diceString = ''
         for ele in args:
             diceString += ele
@@ -256,7 +285,7 @@ class intros(commands.Cog):
                                 output += ' + %d'%num
                         output += ')'
     #print(str(result) + ' = ' + output)
- 
+        
         await ctx.send('Total: %d    Breakdown: %s'%(result,output))
 
     
@@ -265,10 +294,12 @@ class intros(commands.Cog):
     @commands.command()
     async def play(self,ctx,playerID=None):
         """Inputs: <@player>optional"""
+        await ctx.message.delete()
         player_settings = self.find_profile(ctx,playerID=playerID)       
         #print(player.keys())
         volume = player_settings['volume']
         length = player_settings['length']
+
         player = self.find_name(ctx,playerID) 
         audiofile = self.find_audio(player)
         #print(audiofile)
@@ -277,11 +308,25 @@ class intros(commands.Cog):
         #print(channel) 
         if channel is not None:
             await self.play_clip(channel,audiofile,volume=volume,length=length,min_members=-1)
-            
+           
+
+    @commands.command()
+    async def marbles(self,ctx,team,volume=1.0):
+        await ctx.message.delete()
+        audiofile = glob.glob('audio/marbles/*'+team+'*_marbles.mp3')[0]
+        print(audiofile) 
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+       # print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1,length=5,volume=volume)
+
+
     @commands.command()
     async def ska(self,ctx,volume=0.25):
         """Ska 4 Lyfe!"""
-        audiofile = 'Brooklyn 99 - Ska interview.mp3' 
+        await ctx.message.delete()
+        audiofile = 'audio/Brooklyn 99 - Ska interview.mp3' 
        # print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
@@ -292,7 +337,8 @@ class intros(commands.Cog):
     @commands.command()
     async def baddad(self,ctx):
         """Learn to be a good father Maggie"""
-        audiofile = 'Maggie, Bad Dad_n.mp3' 
+        await ctx.message.delete()
+        audiofile = 'audio/Maggie, Bad Dad_n.mp3' 
         #print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
@@ -307,7 +353,8 @@ class intros(commands.Cog):
     @commands.command()
     async def nice(self,ctx):
         """Nice"""
-        audiofile = 'CLICK Nice.mp3' 
+        await ctx.message.delete()
+        audiofile = 'audio/CLICK Nice.mp3' 
        # print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
@@ -316,17 +363,6 @@ class intros(commands.Cog):
             await self.play_clip(channel,audiofile,min_members=-1)
 
 
-    @commands.command()
-    async def hazers(self,ctx):
-        """Nice"""
-        audiofile = 'Hazers for the win.mp3' 
-        #print(audiofile)
-        channel = self.find_voicechat(ctx)
-        #print(after.channel,after)
-       # print(channel) 
-        audiofile = self.create_audio('Hazers for the win')
-        if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1)
 
     @commands.command()
     async def coldone(self,ctx):
@@ -339,6 +375,8 @@ class intros(commands.Cog):
         #print(ctx.channel)
         #print(ctx.guild)
         #print(ctx.guild.voice_channels)
+       
+        await ctx.message.delete()
         if self.players[ctx.author.name + '/mod'][...] == 0 and duration > 3.0:
             duration = 3.0
         if duration >39.0:
@@ -358,6 +396,8 @@ class intros(commands.Cog):
 
     @commands.command()
     async def displaySettings(self,ctx,playerID=None):
+        
+        await ctx.message.delete()
         player_settings = self.find_profile(ctx,playerID)
         modStatus = self.is_mod(ctx.author.name) 
         name = self.find_name(ctx,playerID).name
@@ -375,7 +415,18 @@ class intros(commands.Cog):
             await ctx.author.send(message)
 
     @commands.command()
+    async def spam(self,ctx,playerID=None,number=-1):
+        if number < 0:
+            length = int(np.random.rand(1)*10+4)
+        message ='SPAM\n'
+        for ii in range(length):
+            await ctx.author.send(message)
+
+
+    @commands.command()
     async def update(self,ctx,playerID=None):
+        
+        await ctx.message.delete()
         if self.is_mod(ctx.author.name):
             name = self.find_name(ctx,playerID).name
             self.update_profile(name)
@@ -423,7 +474,7 @@ class intros(commands.Cog):
                 sleeptime = 8
             else:
                 sleeptime = 3
-        return audiofile
+        return 'audio/'+audiofile
 
     async def play_clip(self,channel,audiofile,volume=0.25,length=3.0,min_members=1):
         #players an audio clip to the correct channel 
@@ -433,7 +484,7 @@ class intros(commands.Cog):
             voice = await channel.connect(timeout=1.0)
 
 
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('audio/' + audiofile),volume=volume)
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(audiofile),volume=volume)
             voice.play(source, after=lambda e: print('player error: %s' % e) if e else None)
             await asyncio.sleep(length)
             await voice.disconnect()
@@ -473,6 +524,8 @@ class intros(commands.Cog):
         self.create_key(name,'ban',False)
         self.create_key(name,'bancount',0)
         self.create_key(name,'enable_play',1)
+        
+       
         #print('New Proile Created for %s'%name)        
 
     def is_mod(self,name):
@@ -487,6 +540,9 @@ class intros(commands.Cog):
             dic[key] = self.players[name][key][...]
         return dic
 
+    #def delete_message(self,ctx):
+    #    await ctx.message.delete()
+
     def update_profile(self,name):
         # Updates a profile to contain all new default settings.
         # Preserves all old keys
@@ -497,9 +553,13 @@ class intros(commands.Cog):
         for key in old_settings.keys():
             self.players[name+'/'+key][...] = old_settings[key]    
 
-
-
-
+    @commands.Cog.listener()
+    async def on_member_update(self,before,after):
+        if before.display_name != after.display_name:
+            now = datetime.now()
+            timestr = now.strftime('%Y/%m/%d  %H:%M:%S')
+            with open('logs/nicknames/' + after.name.replace(' ','_') + '_nicknames_' +after.guild.name.replace(' ','_') +'.dat','a') as f:
+                f.write(timestr+'\t'+before.display_name + '\t' + after.display_name + '\n')
 
 @bot.event
 async def on_ready():
@@ -507,6 +567,8 @@ async def on_ready():
     print('------')
 
 
+
+    
 
 
         
