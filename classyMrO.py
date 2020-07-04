@@ -30,13 +30,13 @@ class intros(commands.Cog):
      #~~~~~~~~~~Bot Commands~~~~~~~~~~~
     #Commands directly interacting with the bot's settings.
     @commands.command()
-    async def mute(self,ctx):
+    async def unmute(self,ctx):
         """Enables theme song player"""
         self.muted = True
         self.mutetime = 1.0
 
     @commands.command()
-    async def unmute(self,ctx,duration=-1):
+    async def mute(self,ctx,duration=-1):
         """Disables theme song player. Additional augment will disable it for that many seconds"""
         self.muted = False
         if duration > 0:
@@ -61,28 +61,30 @@ class intros(commands.Cog):
     @commands.command()
     async def test(self,ctx,message):
         """Test"""
-        print(message)
-        print(ctx.author.id)
-        print(message.split('!')[-1].split('>')[0])
-        print(bot.get_all_members())
+        if ctx.author.name == 'thadis':
+            print(message)
+            print(ctx.author.id)
+            print(message.split('!')[-1].split('>')[0])
+            print(bot.get_all_members())
         #print(discord.utils.get(bot.get_all_members(),id=int(message.split('!')[-1].split('>')[0])).split('#')[0])
+
     @commands.command()
     async def dc(self, ctx):
         """Stops and disconnects the bot from oice"""
-
         await ctx.voice_client.disconnect()
+
     @commands.Cog.listener()
     async def on_voice_state_update(self,member: discord.Member,before, after):
         #print(after.channel)      
         #print(bot.voice_clients)
-        print(member.name)
+        #print(member.name)
 
         player = self.user_settings(member.name)        
-        print(player.keys())
+        #print(player.keys())
         volume = player['volume']
         length = player['length']
-        print(volume)
-        print(length) 
+        #print(volume)
+        #print(length) 
         if time.time() > self.mutetime and self.mutetime>0:
             self.muted = True
         else:
@@ -93,7 +95,7 @@ class intros(commands.Cog):
             if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
                 audiofile = self.find_audio(member)
 
-                print(after.channel,after)
+       #         print(after.channel,after)
                 await self.play_clip(after.channel,audiofile,volume,length)
                 
                 
@@ -107,36 +109,37 @@ class intros(commands.Cog):
     @commands.command()
     async def volume(self, ctx,volume: float, playerID=None):
         """Changes the player's volume. Value relative to 1.0"""
-        player = find_name(self,ctx,playerID=None)
-        update_profile(player)
-        update_profile(ctx.author.name)       
+        player = self.find_name(ctx,playerID=playerID)
+      #  print(player.name)
+        self.update_profile(player.name)
+        self.update_profile(ctx.author.name)       
         modStatus = self.players[ctx.author.name + '/mod'][...]
-        if modStatus or (ctx.author.name == player):
-            self.players[player+'/volume'][...] = volume
-            await ctx.send('Volume set to %0.2f for %s'%(self.players[player+'/volume'].value,player))
+        if modStatus or (ctx.author.name == player.name):
+            self.players[player.name+'/volume'][...] = volume
+            await ctx.send('Volume set to %0.2f for %s'%(self.players[player.name+'/volume'][...],player.name))
         else:
             await ctx.send("Need mod status to change someone else's volume")
 
     @commands.command()
-    async def length(self, ctx,length: float, player=''):
+    async def length(self, ctx,length: float, playerID=None):
         """Changes length of song played"""
-        player = find_name(self,ctx,playerID=None)
-        update_profile(player)
-        update_profile(ctx.author.name)       
+        player = self.find_name(ctx,playerID=playerID)
+        self.update_profile(player.name)
+        self.update_profile(ctx.author.name)       
         modStatus = self.players[ctx.author.name + '/mod'][...]
 
         if modStatus:
-            update_key(player,'length',status==length)
-            await ctx.send('Play Length set to %0.1f seconds for %s'%(self.players[player+'/length'].value,player))
+            self.update_key(player.name,'length',length)
+            await ctx.send('Play Length set to %0.1f seconds for %s'%(self.players[player.name+'/length'][...],player.name))
         else:
             await ctx.send('Need mod privileges to change clip length')
                
     @commands.command()
     async def mod(self,ctx,playerID=None,status=1):
         """Mods a player"""
-        player = find_name(self,ctx,playerID=None)
-        update_profile(player)
-        update_profile(ctx.author.name)
+        player = self.find_name(ctx,playerID=playerID)
+        self.update_profile(player.name)
+        self.update_profile(ctx.author.name)
             
         modStatus = self.players[ctx.author.name + '/mod'][...]
         if ctx.author.name == self.owner_name:
@@ -144,7 +147,8 @@ class intros(commands.Cog):
         
         if modStatus:
             try:
-                update_key(player,'mod',status==1)
+     #           print(self.players[player.name + '/mod'][...])
+                self.update_key(player.name,'mod',status==1)
             except KeyError:
                 await ctx.send('Invalid username')
 
@@ -155,21 +159,25 @@ class intros(commands.Cog):
     @commands.command()
     async def ban(self,ctx, otherName=''):
         """He knows what he did."""
+        self.update_profile('Kataki')
+        self.players['Kataki/bancount'][...] += 1
+
         if ctx.author.name == "Kataki" and otherName == '':
             await ctx.send('Good that you know your place')
         else:
             await ctx.send('Kataki Banned')
             
     @commands.command()
-    async def ban_count(self,ctx):
-        self.update_profile('Kataki')
-        print(self.players['Kataki/ban_count'])        
+    async def bancount(self,ctx,playerID=None):
         
+        name = self.find_name(ctx,playerID).name
+        self.update_profile(name)
+        await ctx.send('%s has been banned %d times.'%(name,self.players[name + '/bancount'][...]))                
 
     
     @commands.command()
     async def roll(self,ctx,*args):
-        print(args)  
+          
         diceString = ''
         for ele in args:
             diceString += ele
@@ -230,7 +238,7 @@ class intros(commands.Cog):
                             else:
                                 output += ' + %d'%num
                         output += ')'
-        print(str(result) + ' = ' + output)
+    #print(str(result) + ' = ' + output)
  
         await ctx.send('Total: %d    Breakdown: %s'%(result,output))
 
@@ -244,23 +252,23 @@ class intros(commands.Cog):
         #print(player.keys())
         volume = player_settings['volume']
         length = player_settings['length']
-        
+        player = self.find_name(ctx,playerID) 
         audiofile = self.find_audio(player)
         #print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
         #print(channel) 
         if channel is not None:
-            await self.play_clip(channel,audiofile,volume=volume,length=length)
+            await self.play_clip(channel,audiofile,volume=volume,length=length,min_members=-1)
             
     @commands.command()
     async def ska(self,ctx,volume=0.25):
         """Ska 4 Lyfe!"""
         audiofile = 'Brooklyn 99 - Ska interview.mp3' 
-        print(audiofile)
+       # print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
-        print(channel) 
+       # print(channel) 
         if channel is not None:
             await self.play_clip(channel,audiofile,min_members=-1,length=5,volume=volume)
 
@@ -268,12 +276,12 @@ class intros(commands.Cog):
     async def baddad(self,ctx):
         """Learn to be a good father Maggie"""
         audiofile = 'Maggie, Bad Dad_n.mp3' 
-        print(audiofile)
+        #print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
-        print(channel) 
+        #print(channel) 
         if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1)
+            await self.play_clip(channel,audiofile,volume=0.4,min_members=-1)
 
 
 
@@ -283,10 +291,23 @@ class intros(commands.Cog):
     async def nice(self,ctx):
         """Nice"""
         audiofile = 'CLICK Nice.mp3' 
-        print(audiofile)
+       # print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
-        print(channel) 
+       # print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1)
+
+
+    @commands.command()
+    async def hazers(self,ctx):
+        """Nice"""
+        audiofile = 'Hazers for the win.mp3' 
+        #print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+       # print(channel) 
+        audiofile = self.create_audio('Hazers for the win')
         if channel is not None:
             await self.play_clip(channel,audiofile,min_members=-1)
 
@@ -298,10 +319,10 @@ class intros(commands.Cog):
     @commands.command()
     async def shoutout(self,ctx,duration=1.5):
         """Gives Mr. O a shoutout"""
-        print(ctx.channel)
-        print(ctx.guild)
-        print(ctx.guild.voice_channels)
-        if self.players[ctx.author.name + '/mod'].value == 0 and duration > 3.0:
+        #print(ctx.channel)
+        #print(ctx.guild)
+        #print(ctx.guild.voice_channels)
+        if self.players[ctx.author.name + '/mod'][...] == 0 and duration > 3.0:
             duration = 3.0
         if duration >39.0:
             duration = 39.0
@@ -315,6 +336,26 @@ class intros(commands.Cog):
         await asyncio.sleep(duration)
         await voice.disconnect()
 
+    #~~~~~~~~~~~~~~Testing commands ~~~~~~~~~~~~~~~~~~~
+    #commands to help test code
+
+    @commands.command()
+    async def displaySettings(self,ctx,playerID=None):
+        player_settings = self.find_profile(ctx,playerID)
+ 
+        name = self.find_name(ctx,playerID).name
+        print('~~~~~~~~~~~~~~~~')
+        print('Settings for ', name) 
+        for key in player_settings.keys():
+            print(key,player_settings[key])
+        print('~~~~~~~~~~~~~~~~')    
+
+
+    @commands.command()
+    async def update(self,ctx,playerID=None):
+        name = self.find_name(ctx,playerID).name
+        self.update_profile(name)
+        print("Updated %s's profile"%name)
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
     
@@ -330,12 +371,19 @@ class intros(commands.Cog):
         player = self.find_name(ctx,playerID=playerID)        
         player_settings = self.user_settings(player.name) 
         return player_settings
+
+    def create_audio(self,message):
+
+        myobj = gTTS(text=message,lang='en',slow=False)
+        myobj.save('audio/' + message + '.mp3')
+        audiofile = message + '.mp3'
+        return audioFile
     
     def find_audio(self,member):
         #Finds the audio file associated with the correct player
         audiofile = ''
-        print(member.name)
-        print(member.display_name)
+        #print(member.name)
+        #print(member.display_name)
         if not(member.name == 'Mr. O'):
             if not(glob.glob('audio/' + member.name + '.mp3') == []):
                 audiofile = member.name + '.mp3'
@@ -355,9 +403,9 @@ class intros(commands.Cog):
 
     async def play_clip(self,channel,audiofile,volume=0.25,length=3.0,min_members=1):
         #players an audio clip to the correct channel 
-        print(len(channel.members))
+        #print(len(channel.members))
         if len(channel.members) > min_members:
-            print('playing clip ' + audiofile)
+          #  print('playing clip ' + audiofile)
             voice = await channel.connect(timeout=1.0)
 
 
@@ -370,21 +418,28 @@ class intros(commands.Cog):
 
     async def join_chat(self, ctx):
         #Joins a voice channel
-        print(ctx.voice_client)
+        #print(ctx.voice_client)
         if ctx.voice_client is not None:
             return await ctx.voice_client.move_to(self.find_voicechat(ctx))
         channel = self.find_voicechat(ctx)
         await channel.connect()
 
     def create_key(self,name, key, default):
-        #adds a new setting to a player's settings. If it already exists is does nothing.
-        try:
-            self.players.create_dataset(name+'/' + key,data=default)
-        except RuntimeError:
-            print('Key already exists')
+        #adds a new setting to a player's settings. If it already 
+        self.update_key(name,key,default)
             
     def update_key(self,name,key,value):
-        self.players[name+'/'+key] = value
+        #try:    
+        
+        #print(name+'/'+key)
+
+        if name + '/' + key in self.players:
+            location = self.players[name+'/'+key]
+            location[...] = value
+        else:
+            self.players[name + '/' + key] = value
+        #except RuntimeError:
+        #    self.players.create_dataset(name+'/'+key,data=value)
 
     def create_profile(self,name):
         # Creates a profile for the user
@@ -392,25 +447,24 @@ class intros(commands.Cog):
         self.create_key(name,'mod',False)
         self.create_key(name,'length',3.0)
         self.create_key(name,'ban',False)
-        self.create_key(name,'ban_count',0)
+        self.create_key(name,'bancount',0)
         self.create_key(name,'enable_play',1)
         #print('New Proile Created for %s'%name)        
 
-
     def user_settings(self,name):
         #returns all of the users settings in a dictionary
-        self.update_profile(name)
+    #    self.update_profile(name)
         dic = {}
         for key in self.players[name].keys():
-            print(key)
-            dic[key] = self.players[name][key].value
+         #   print(key)
+            dic[key] = self.players[name][key][...]
         return dic
 
     def update_profile(self,name):
         # Updates a profile to contain all new default settings.
         # Preserves all old keys
         old_settings = self.user_settings(name)
-
+        #print(name)
         self.create_profile(name)
         
         for key in old_settings.keys():
