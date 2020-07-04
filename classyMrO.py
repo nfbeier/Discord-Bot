@@ -31,7 +31,7 @@ class intros(commands.Cog):
     #Commands directly interacting with the bot's settings.
     @commands.command()
     async def unmute(self,ctx):
-        """Enables theme song player"""
+        """Re-enables Mr. O's playing intro songs."""
         self.muted = True
         self.mutetime = 1.0
 
@@ -70,7 +70,7 @@ class intros(commands.Cog):
 
     @commands.command()
     async def dc(self, ctx):
-        """Stops and disconnects the bot from oice"""
+        """Stops and disconnects the bot from voice"""
         await ctx.voice_client.disconnect()
 
     @commands.Cog.listener()
@@ -106,23 +106,36 @@ class intros(commands.Cog):
                     return channel
         return None               
     #~~~~~~~~~~~Player Profile Commands    
+ 
+
+    @commands.command()
+    async def currentvolume(self, ctx, playerID=None):
+        """
+            Inputs: @player"""
+        player = self.find_name(ctx,playerID=playerID)
+      #  print(player.name)
+        self.update_profile(player.name)
+        self.update_profile(ctx.author.name)       
+        await ctx.send('Volume set to %0.3f for %s'%(self.players[player.name+'/volume'][...],player.name))
+
     @commands.command()
     async def volume(self, ctx,volume: float, playerID=None):
-        """Changes the player's volume. Value relative to 1.0"""
+        """ Inputs: <desired volume> <@player>optional"""
         player = self.find_name(ctx,playerID=playerID)
       #  print(player.name)
         self.update_profile(player.name)
         self.update_profile(ctx.author.name)       
         modStatus = self.players[ctx.author.name + '/mod'][...]
         if modStatus or (ctx.author.name == player.name):
+            oldVolume = self.players[player.name+'/volume'][...]
             self.players[player.name+'/volume'][...] = volume
-            await ctx.send('Volume set to %0.2f for %s'%(self.players[player.name+'/volume'][...],player.name))
+            await ctx.send('Volume set from %0.3f to %0.3f for %s'%(oldVolume,self.players[player.name+'/volume'][...],player.name))
         else:
             await ctx.send("Need mod status to change someone else's volume")
 
     @commands.command()
     async def length(self, ctx,length: float, playerID=None):
-        """Changes length of song played"""
+        """Inputs: <desired length> <@player>optional   MODS ONLY"""
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
         self.update_profile(ctx.author.name)       
@@ -136,37 +149,44 @@ class intros(commands.Cog):
                
     @commands.command()
     async def mod(self,ctx,playerID=None,status=1):
-        """Mods a player"""
+        """Inputs: <@player> <status>optional """
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
         self.update_profile(ctx.author.name)
             
         modStatus = self.players[ctx.author.name + '/mod'][...]
-        if ctx.author.name == self.owner_name:
-            try:
-     #           print(self.players[player.name + '/mod'][...])
-                self.update_key(player.name,'mod',status==1)
-            except KeyError:
-                await ctx.send('Invalid username')
-
+        if status == 1:
+            if ctx.author.name == self.owner_name:
+                try:
+     #               print(self.players[player.name + '/mod'][...])
+                     self.update_key(player.name,'mod',1)
+                except KeyError:
+                    await ctx.send('Invalid username')
+        else:
+            if modStatus == 1 or ctx.author.name == self.owner_name:
+                try:
+                    self.update_key(player.name,'mod',0)
+                except KeyError:
+                    await ctx.send('Invalid username')
                 
     #~~~~~~~Player Functions~~~~~~~~~~~~
     #Functions that have minimal interaction with the rest of the program
     #and are mainly standalone functions.
     @commands.command()
-    async def ban(self,ctx, otherName=''):
-        """He knows what he did."""
-        self.update_profile('Kataki')
-        self.players['Kataki/bancount'][...] += 1
+    async def ban(self,ctx, playerID=None):
+        """Inputs: <@player>optional"""
+        player = self.find_name(ctx,playerID=playerID)
+        self.update_profile(player.name)
+        self.players[player.name + '/bancount'][...] += 1
 
         if ctx.author.name == "Kataki" and otherName == '':
             await ctx.send('Good that you know your place')
         else:
-            await ctx.send('Kataki Banned')
+            await ctx.send('%s Banned'%player.name)
             
     @commands.command()
     async def bancount(self,ctx,playerID=None):
-        
+        """Inputs: <@playerID>optional""" 
         name = self.find_name(ctx,playerID).name
         self.update_profile(name)
         await ctx.send('%s has been banned %d times.'%(name,self.players[name + '/bancount'][...]))                
@@ -174,7 +194,7 @@ class intros(commands.Cog):
     
     @commands.command()
     async def roll(self,ctx,*args):
-          
+        """Inputs: Dice roll represented in terms of XdY+AxB-Z"""  
         diceString = ''
         for ele in args:
             diceString += ele
@@ -244,7 +264,7 @@ class intros(commands.Cog):
     #any command that mainly just plays audio files
     @commands.command()
     async def play(self,ctx,playerID=None):
-        """Players theme song for user or whoever they @"""
+        """Inputs: <@player>optional"""
         player_settings = self.find_profile(ctx,playerID=playerID)       
         #print(player.keys())
         volume = player_settings['volume']
