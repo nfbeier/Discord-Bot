@@ -365,7 +365,8 @@ class intros(commands.Cog):
     @commands.command()
     async def nice(self,ctx):
         """Nice"""
-        await ctx.message.delete()
+        #await ctx.message.delete()
+        await self.post_image(ctx, 'nice.png')
         audiofile = 'audio/CLICK Nice.mp3' 
        # print(audiofile)
         channel = self.find_voicechat(ctx)
@@ -373,6 +374,9 @@ class intros(commands.Cog):
        # print(channel) 
         if channel is not None:
             await self.play_clip(channel,audiofile,min_members=-1)
+
+
+
 
     @commands.command()
     async def hornyonmain(self,ctx):
@@ -531,9 +535,9 @@ class intros(commands.Cog):
         await self.post_image(ctx, 'meowdy.png')
 
 
-    @commands.command()
-    async def nice(self, ctx):
-        await self.post_image(ctx, 'nice.png')
+#    @commands.command()
+#    async def nice(self, ctx):
+#        await self.post_image(ctx, 'nice.png')
 
 
     @commands.command()
