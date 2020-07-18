@@ -443,6 +443,26 @@ class intros(commands.Cog):
         await asyncio.sleep(duration)
         await voice.disconnect()
 
+    #~~~~~~~~~~~~~~GIF Commands ~~~~~~~~~~~~~~~~~~~~~~
+
+    @commands.command()
+    async def trash(self,ctx,gifnum=-1):
+        await self.post_gif(ctx,'trash',gifnum)
+
+
+    @commands.command()
+    async def dwagon(self,ctx,gifnum=-1):
+        await self.post_gif(ctx,'dwagon',gifnum)
+
+    @commands.command()
+    async def dragon(self,ctx,gifnum=-1):
+        
+        await self.post_gif(ctx,'dragon',gifnum)
+
+  
+    @commands.command()
+    async def gif(self,ctx,gifName,gifnum=-1):
+        await self.post_gif(ctx,gifName,gifnum)
     #~~~~~~~~~~~~~~Testing commands ~~~~~~~~~~~~~~~~~~~
     #commands to help test code
 
@@ -541,7 +561,21 @@ class intros(commands.Cog):
             await asyncio.sleep(length)
             await voice.disconnect()
 
-
+    async def post_gif(self, ctx,gifname,gifnum = -1):
+        print(gifnum) 
+        giflist = glob.glob('gifs/'+gifname + '*.gif')
+        gifnum = int(gifnum)
+        if len(giflist)>0:
+            giffile = glob.glob('gifs/'+gifname+'_%d.gif'%gifnum)
+            if len(giffile) < 1:
+                giffile = [giflist[np.random.randint(0,len(giflist))]]
+            if gifname == 'dragon':
+                if np.random.random()>0.95:
+                    giffile = glob.glob('gifs/dwagon*.gif')
+            await ctx.message.delete()
+            await ctx.send(file=discord.File(giffile[0]))
+        else:
+            print('Invalid gif name')
 
     async def join_chat(self, ctx):
         #Joins a voice channel
