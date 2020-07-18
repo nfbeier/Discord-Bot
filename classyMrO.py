@@ -184,12 +184,21 @@ class intros(commands.Cog):
         await ctx.message.delete()
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
-        self.players[player.name + '/bancount'][...] += 1
+        if player.name == 'thadis':
+            if ctx.author.name == 'thadis':
+                self.players[player.name + '/bancount'][...] += 1
 
-        if ctx.author.name == "Kataki" and player == 'Kataki':
-            await ctx.send('Good that you know your place Kataki')
-        else:
-            await ctx.send('%s Banned by %s'%(player.name,ctx.author.name))
+                await ctx.send('%s Banned by %s'%(player.name,ctx.author.name))
+            else:
+                self.players[ctx.author.name + '/bancount'][...] += 1
+                await ctx.send('%s Banned by %s'%(ctx.author.name,ctx.author.name)) 
+        else:    
+            self.players[player.name + '/bancount'][...] += 1
+
+            if ctx.author.name == "Kataki" and player.name == 'Kataki':
+                await ctx.send('Good that you know your place Kataki')
+            else:
+                await ctx.send('%s Banned by %s'%(player.name,ctx.author.name))
             
     @commands.command()
     async def bancount(self,ctx,playerID=None):
@@ -295,6 +304,9 @@ class intros(commands.Cog):
     async def play(self,ctx,playerID=None):
         """Inputs: <@player>optional"""
         await ctx.message.delete()
+        player = self.find_name(ctx,playerID)
+        print(player.name)
+        self.update_profile(player.name)
         player_settings = self.find_profile(ctx,playerID=playerID)       
         #print(player.keys())
         volume = player_settings['volume']
@@ -361,6 +373,46 @@ class intros(commands.Cog):
        # print(channel) 
         if channel is not None:
             await self.play_clip(channel,audiofile,min_members=-1)
+
+    @commands.command()
+    async def hornyonmain(self,ctx):
+        await self.hunt(ctx)
+
+    @commands.command()
+    async def hunt(self,ctx):
+        """Nice"""
+        await ctx.message.delete()
+        audiofile = 'audio/hunt.mp3' 
+       # print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+       # print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1)
+
+    @commands.command()
+    async def horn(self,ctx):
+        """Nice"""
+        await ctx.message.delete()
+        audiofile = 'audio/horn.mp3' 
+       # print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+       # print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,min_members=-1)
+
+    @commands.command()
+    async def tuff(self,ctx):
+        """Nice"""
+        await ctx.message.delete()
+        audiofile = 'audio/tuff.mp3' 
+       # print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+       # print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,volume=0.5,min_members=-1)
 
 
 
@@ -546,9 +598,14 @@ class intros(commands.Cog):
     def update_profile(self,name):
         # Updates a profile to contain all new default settings.
         # Preserves all old keys
-        old_settings = self.user_settings(name)
+        try:
+            old_settings = self.user_settings(name)
+            self.create_profile(name)
+        except KeyError:
+            self.create_profile(name)
+            old_settings = self.user_settings(name)
         #print(name)
-        self.create_profile(name)
+
         
         for key in old_settings.keys():
             self.players[name+'/'+key][...] = old_settings[key]    
