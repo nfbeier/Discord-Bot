@@ -470,15 +470,6 @@ class intros(commands.Cog):
         await self.post_image(ctx, 'ColdOne.png')
 
 
-    @commands.command()
-    async def commandmaker(self, ctx):
-        await self.post_image(ctx, 'commandmaker.py')
-
-
-    @commands.command()
-    async def commands(self, ctx):
-        await self.post_image(ctx, 'commands.txt')
-
 
     @commands.command()
     async def drift(self, ctx):
