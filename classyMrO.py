@@ -359,8 +359,52 @@ class intros(commands.Cog):
             await self.play_clip(channel,audiofile,volume=0.4,min_members=-1)
 
 
+    @commands.command()
+    async def gooddad(self,ctx):
+        """Learn to be a good father Maggie"""
+        await ctx.message.delete()
+        audiofile = 'audio/Maggie, Good Dad_n.mp3' 
+        #print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        #print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,volume=0.4,min_members=-1)
+
+    @commands.command()
+    async def boat(self,ctx):
+        """I'm on a boat"""
+        await ctx.message.delete()
+        audiofile = 'audio/I am on a boat.mp3' 
+        #print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        #print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,volume=0.4,min_members=-1)
 
 
+    @commands.command()
+    async def demonwall(self,ctx):
+        await self.wall(ctx)
+
+    @commands.command()
+    async def wall(self,ctx,longwall=0):
+        """Learn to be a good father Maggie"""
+        await ctx.message.delete()
+        if longwall == 0:
+            length = 6
+            audiofile = 'audio/shortwall.mp3'
+        else:
+            length = 270
+            audiofile = 'audio/longwall.mp3'
+
+        #print(audiofile)
+        channel = self.find_voicechat(ctx)
+        #print(after.channel,after)
+        #print(channel) 
+        if channel is not None:
+            await self.play_clip(channel,audiofile,volume=0.4,min_members=-1,length=length)
 
     @commands.command()
     async def nice(self,ctx):
@@ -448,6 +492,19 @@ class intros(commands.Cog):
         await voice.disconnect()
 
     #~~~~~~~~~~~~~~Image/GIF Commands ~~~~~~~~~~~~~~~~~~~~~~
+
+    @commands.command()
+    async def hazers(self,ctx):
+        await self.post_image(ctx,'hazers.png')
+
+
+    @commands.command()
+    async def catboy(self,ctx):
+        await self.post_image(ctx,'catboy.png')
+
+    @commands.command()
+    async def yoona(self,ctx):
+        await self.post_image(ctx,'yoona.png')
 
     @commands.command()
     async def airhorn(self, ctx):
