@@ -735,6 +735,28 @@ class intros(commands.Cog):
             print(name)
             self.remove_profile(name)
 
+    @commands.command()
+    async def reset_nickname(self,ctx,playerID=None):
+        
+        if self.is_mod(ctx.author.name):
+            player = self.find_name(ctx,playerID)
+        else:
+            player = self.find_name(ctx,None)
+        
+        self.update_profile(player.name)
+        nick = self.players[player.name+'/default_nickname'][...]
+        
+        
+        await player.edit(nick=str(nick))
+
+
+    @commands.command()
+    async def default_nickname(self,ctx,nickname='',playerID=None):
+        name = self.find_name(ctx,playerID).name 
+        if nickname == '':
+            nickname = name
+        self.update_key(name,'default_nickname',nickname)
+
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
     
     def find_name(self,ctx,playerID=None):
@@ -832,13 +854,16 @@ class intros(commands.Cog):
     def create_key(self,name, key, default):
         #adds a new setting to a player's settings. If it already 
         self.update_key(name,key,default)
+
+    
             
     def update_key(self,name,key,value):
         #try:    
         
         #print(name+'/'+key)
         #self.players[name+'/'+key] = value
-        del self.players[name+'/'+key]
+        if name + '/' + key in self.players:
+            del self.players[name+'/'+key]
         self.players[name+'/'+key] = value
         '''
         if name + '/' + key in self.players:
@@ -860,7 +885,7 @@ class intros(commands.Cog):
         self.create_key(name,'ban',False)
         self.create_key(name,'bancount',0)
         self.create_key(name,'enable_play',1)
-        
+        self.create_key(name,'default_nickname',name) 
        
         #print('New Proile Created for %s'%name)        
 
@@ -891,11 +916,16 @@ class intros(commands.Cog):
 
         for key in self.players['default'].keys():
             if name + '/' + key not in self.players:
-                self.players[name+'/'+key] = self.players['default/'+key]
+                if not(key =='/default_nickname'):
+                    self.players[name+'/'+key] = self.players['default/'+key]
+                else:
+                    self.players[name+'/'+key] = name
+
         '''
         try:
             old_settings = self.user_settings(name)
             self.create_profile(name)
+            ti
         except KeyError:
             self.create_profile(name)
             old_settings = self.user_settings(name)
