@@ -79,7 +79,7 @@ class intros(commands.Cog):
         #print(after.channel)      
         #print(bot.voice_clients)
         #print(member.name)
-
+        self.update_profile(member.name)
         player = self.user_settings(member.name)        
         #print(player.keys())
         volume = player['volume']
@@ -159,13 +159,16 @@ class intros(commands.Cog):
         player = self.find_name(ctx,playerID=playerID)
         self.update_profile(player.name)
         self.update_profile(ctx.author.name)
-            
+         
         modStatus = self.players[ctx.author.name + '/mod'][...]
         if status == 1:
+            print('in status==1')
             if ctx.author.name == self.owner_name:
+                print('in if statement')
                 try:
      #               print(self.players[player.name + '/mod'][...])
                      self.update_key(player.name,'mod',1)
+       
                 except KeyError:
                     await ctx.send('Invalid username')
         else:
@@ -215,6 +218,7 @@ class intros(commands.Cog):
         message = '~~~~~\n'
         message += 'Nicknames for '+name + '\n'
         fileName = 'logs/nicknames/'+name.replace(' ','_') +'_nicknames_'+ctx.guild.name.replace(' ','_') + '.dat'
+        print(fileName,name)
         if os.path.exists(fileName):
             with open(fileName,'r') as f:
                 lines = f.readlines()
@@ -325,13 +329,19 @@ class intros(commands.Cog):
     @commands.command()
     async def marbles(self,ctx,team,volume=1.0):
         await ctx.message.delete()
-        audiofile = glob.glob('audio/marbles/*'+team+'*_marbles.mp3')[0]
-        print(audiofile) 
-        channel = self.find_voicechat(ctx)
+        audiofile = glob.glob('audio/marbles/*'+team+'*_marbles.mp3')
+        if len(audiofile) > 0:
+            audiofile = audiofile[0]
+            imagefile = audiofile.replace('audio/','images/').replace('.mp3','.png')
+            print(imagefile) 
+            channel = self.find_voicechat(ctx)
         #print(after.channel,after)
        # print(channel) 
-        if channel is not None:
-            await self.play_clip(channel,audiofile,min_members=-1,length=5,volume=volume)
+            if os.path.isfile(imagefile): 
+                await self.post_image(ctx,imagefile.replace('images/',''))
+            if channel is not None:
+                await self.play_clip(channel,audiofile,min_members=-1,length=2,volume=volume)
+
 
 
     @commands.command()
@@ -458,9 +468,11 @@ class intros(commands.Cog):
        # print(audiofile)
         channel = self.find_voicechat(ctx)
         #print(after.channel,after)
-       # print(channel) 
+       # print(channel)
+         
+        await self.post_image(ctx, 'tuffin.png')
         if channel is not None:
-            await self.play_clip(channel,audiofile,volume=0.5,min_members=-1)
+            await self.play_clip(channel,audiofile,length=4,volume=0.5,min_members=-1)
 
 
 
@@ -679,20 +691,21 @@ class intros(commands.Cog):
         
         await ctx.message.delete()
         player_settings = self.find_profile(ctx,playerID)
+        print('here')
         modStatus = self.is_mod(ctx.author.name) 
         name = self.find_name(ctx,playerID).name
         if playerID == None:
-            message = '.\n'
+            message = '```\n'
             message += 'Settings for %s\n'%name 
             for key in player_settings.keys():
                 message += '%s: %s\n'%(key,str(player_settings[key]))         
-            await ctx.author.send(message)
+            await ctx.author.send(message+'```')
         elif modStatus == True or ctx.author.name == name:
-            message = '.\n'
+            message = '```.\n'
             message += 'Settings for %s\n'%name 
             for key in player_settings.keys():
                 message += '%s: %s\n'%(key,str(player_settings[key]))         
-            await ctx.author.send(message)
+            await ctx.author.send(message+'```')
 
     @commands.command()
     async def spam(self,ctx,playerID=None,number=-1):
@@ -711,6 +724,16 @@ class intros(commands.Cog):
             name = self.find_name(ctx,playerID).name
             self.update_profile(name)
             print("Updated %s's profile"%name)
+
+
+    @commands.command()
+    async def remove(self,ctx,playerID=None):
+        await ctx.message.delete()
+        print(self.is_mod(ctx.author.name))
+        if self.is_mod(ctx.author.name):
+            name = self.find_name(ctx,playerID).name
+            print(name)
+            self.remove_profile(name)
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
     
@@ -774,7 +797,12 @@ class intros(commands.Cog):
     async def post_image(self,ctx,fileName):
         filelist = glob.glob('images/'+fileName)
         if len(filelist) > 0:
-            await ctx.message.delete()
+            print(ctx.message.content)
+            try:
+                await ctx.message.delete()
+            except discord.errors.NotFound:
+                print('not found')
+            print(ctx.message.content)
             await ctx.send(file=discord.File(filelist[0]))
 
     async def post_gif(self, ctx,gifname,gifnum = -1):
@@ -809,12 +837,18 @@ class intros(commands.Cog):
         #try:    
         
         #print(name+'/'+key)
-
+        #self.players[name+'/'+key] = value
+        del self.players[name+'/'+key]
+        self.players[name+'/'+key] = value
+        '''
         if name + '/' + key in self.players:
+            print(name+'/'+key)
             location = self.players[name+'/'+key]
             location[...] = value
+            print(self.players[name+'/'+key][...])
         else:
             self.players[name + '/' + key] = value
+        '''
         #except RuntimeError:
         #    self.players.create_dataset(name+'/'+key,data=value)
 
@@ -835,7 +869,7 @@ class intros(commands.Cog):
 
     def user_settings(self,name):
         #returns all of the users settings in a dictionary
-    #    self.update_profile(name)
+        self.update_profile(name)
         dic = {}
         for key in self.players[name].keys():
          #   print(key)
@@ -845,9 +879,20 @@ class intros(commands.Cog):
     #def delete_message(self,ctx):
     #    await ctx.message.delete()
 
+    def remove_profile(self,name):
+        print(name)
+        del self.players[name]
+
     def update_profile(self,name):
         # Updates a profile to contain all new default settings.
         # Preserves all old keys
+        self.create_profile('default')
+         
+
+        for key in self.players['default'].keys():
+            if name + '/' + key not in self.players:
+                self.players[name+'/'+key] = self.players['default/'+key]
+        '''
         try:
             old_settings = self.user_settings(name)
             self.create_profile(name)
@@ -859,7 +904,7 @@ class intros(commands.Cog):
         
         for key in old_settings.keys():
             self.players[name+'/'+key][...] = old_settings[key]    
-
+        '''
     @commands.Cog.listener()
     async def on_member_update(self,before,after):
         if before.display_name != after.display_name:
