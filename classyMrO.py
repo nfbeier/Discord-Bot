@@ -737,25 +737,26 @@ class intros(commands.Cog):
 
     @commands.command()
     async def reset_nickname(self,ctx,playerID=None):
-        
-        if self.is_mod(ctx.author.name):
-            player = self.find_name(ctx,playerID)
-        else:
-            player = self.find_name(ctx,None)
-        
-        self.update_profile(player.name)
-        nick = self.players[player.name+'/default_nickname'][...]
-        
-        
-        await player.edit(nick=str(nick))
+        player = self.find_name(ctx,playerID)
+        if self.is_mod(ctx.author.name) or player.name == ctx.author.name:        
+            self.update_profile(player.name)
+            nick = self.players[player.name+'/default_nickname'][...]
+            await player.edit(nick=str(nick))
 
 
     @commands.command()
-    async def default_nickname(self,ctx,nickname='',playerID=None):
-        name = self.find_name(ctx,playerID).name 
-        if nickname == '':
-            nickname = name
-        self.update_key(name,'default_nickname',nickname)
+    async def default_nickname(self,ctx,playerID=None,*args):
+        if playerID != None:
+            
+            nickname = "".join(args[:])
+            print(nickname)
+            name = self.find_name(ctx,playerID).name 
+            author = self.find_name(ctx,None).name
+
+            if name == author or self.is_mod(ctx.author.name):
+                if nickname == '':
+                    nickname = name
+                self.update_key(name,'default_nickname',nickname)
 
     #~~~~~~~~~~~~~~~Helper Commands~~~~~~~~~~~~~~~~~~~~~
     
