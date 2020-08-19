@@ -16,6 +16,10 @@ ffmpeg_options = {
     'options': '-vn'
 }
 
+import sys
+runDir = os.getcwd()
+sys.path.insert(1,runDir + '/cogs')
+from cogTest import cogTest
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"),
                    description='Relatively simple music bot example')
 
@@ -958,5 +962,6 @@ async def on_ready():
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+bot.add_cog(cogTest(bot))
 bot.add_cog(intros(bot))
 bot.run(TOKEN)
