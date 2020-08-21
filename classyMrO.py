@@ -36,6 +36,7 @@ class intros(commands.Cog):
         self.owner_name = 'thadis'
         self.mutetime = time.time()
         self.serversettings = {}
+        self.logging_channels = ['bot-lab']
         with h5py.File('settings/serversettings.h5','r') as hf:
             for key in hf.keys():
                 self.serversettings[key] = hf[key][...]
@@ -133,6 +134,14 @@ class intros(commands.Cog):
         await ctx.message.delete()
         self.update_key(ctx.author.name,'enable_logging',True)
         await ctx.author.send('You have opted in for message logging. To opt out send the message !opt_out in any channel Mr. O can see.')
+
+
+    @commands.command()
+    async def opt_out(self,ctx):
+        await ctx.message.delete()
+        self.update_key(ctx.author.name,'enable_logging',False)
+        await ctx.author.send('You have opted out for message logging. To confirm use !displaySettings in a channel Mr. O can see and check the "enable_logging" value is False.')
+
 
 
     @commands.command()
@@ -975,9 +984,13 @@ class intros(commands.Cog):
         guild = message.guild
         if guild:
             name = message.author.name
-            if self.players[name+'/enable_logging'][...]:
-                with open('logs/%f.dat'%(guild.id),'a') as f:
-                    print("{0.created_at} : {0.author.name} : {0.channel} : {0.content} : {0.attachments}".format(message),file=f)
+            #print(message.channel,self.logging_channels[0])    
+            if message.channel.name in self.logging_channels:
+            #    print('channel in logging_channel')
+                if self.players[name+'/enable_logging'][...]:
+             #       print('message logged')
+                    with open('logs/%f.dat'%(guild.id),'a') as f:
+                        print("{0.created_at}\t{0.author.name}\t{0.channel}\t{0.content}\t{0.attachments}".format(message),file=f)
             #await bot.process_commands(message)
              
     @commands.Cog.listener()
