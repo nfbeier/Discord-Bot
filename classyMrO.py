@@ -128,7 +128,12 @@ class intros(commands.Cog):
                     return channel
         return None               
     #~~~~~~~~~~~Player Profile Commands    
- 
+    @commands.command()
+    async def opt_in(self,ctx):
+        await ctx.message.delete()
+        self.update_key(ctx.author.name,'enable_logging',True)
+        await ctx.author.send('You have opted in for message logging. To opt out send the message !opt_out in any channel Mr. O can see.')
+
 
     @commands.command()
     async def currentvolume(self, ctx, playerID=None):
@@ -915,7 +920,7 @@ class intros(commands.Cog):
         self.create_key(name,'bancount',0)
         self.create_key(name,'enable_play',1)
         self.create_key(name,'default_nickname',name) 
-       
+        self.create_key(name,'enable_logging',False) 
         #print('New Proile Created for %s'%name)        
 
     def is_mod(self,name):
@@ -970,7 +975,7 @@ class intros(commands.Cog):
         guild = message.guild
         if guild:
             name = message.author.name
-            if name == self.owner_name:
+            if self.players[name+'/enable_logging'][...]:
                 with open('logs/%f.dat'%(guild.id),'a') as f:
                     print("{0.created_at} : {0.author.name} : {0.channel} : {0.content} : {0.attachments}".format(message),file=f)
             #await bot.process_commands(message)
