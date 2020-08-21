@@ -15,6 +15,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Parses arguments')
 parser.add_argument('--TEST_MODE',type=int,default=0)
+parser.add_argument('--UPDATE_ALL',type=int,default=1)
 args = parser.parse_args()
 
 # Suppress noise about console usage from errors
@@ -31,10 +32,11 @@ class intros(commands.Cog):
         self.bot = bot
         self.muted = True
         self.players = h5py.File('settings/players.h5','a')
+        
         self.owner_name = 'thadis'
         self.mutetime = time.time()
         self.serversettings = {}
-        with h5py.File('serversettings.h5','r') as hf:
+        with h5py.File('settings/serversettings.h5','r') as hf:
             for key in hf.keys():
                 self.serversettings[key] = hf[key][...]
         #await channel.send("Mr. O is well rested from his nap.")
@@ -744,6 +746,13 @@ class intros(commands.Cog):
             self.update_profile(name)
             print("Updated %s's profile"%name)
 
+    
+    def update_all(self):
+        print(self.bot.guilds)
+        for guild in self.bot.guilds:
+            for member in guild.members:
+                print('Updating ' + member.name)
+                self.update_profile(member.name)
 
     @commands.command()
     async def remove(self,ctx,playerID=None):
@@ -957,15 +966,15 @@ class intros(commands.Cog):
         '''
     @commands.Cog.listener()
     async def on_message(self,message):
-        print(message.author)
+        #print(message.author)
         guild = message.guild
         if guild:
             name = message.author.name
             if name == self.owner_name:
                 with open('logs/%f.dat'%(guild.id),'a') as f:
-                    print("{0.created_at} : {0.author.name} : {0.content} : {0.attachments}".format(message),file=f)
-            await bot.process_commands(message)
-    
+                    print("{0.created_at} : {0.author.name} : {0.channel} : {0.content} : {0.attachments}".format(message),file=f)
+            #await bot.process_commands(message)
+             
     @commands.Cog.listener()
     async def on_member_update(self,before,after):
         if before.display_name != after.display_name:
@@ -974,14 +983,21 @@ class intros(commands.Cog):
             with open('logs/nicknames/' + after.name.replace(' ','_') + '_nicknames_' +after.guild.name.replace(' ','_') +'.dat','a') as f:
                 f.write(timestr+'\t'+before.display_name + '\t' + after.display_name + '\n')
 
-@bot.event
-async def on_ready():
-    print('Logged in as {0} ({0.id})'.format(bot.user))
-    print('------')
-    guild = discord.utils.get(bot.guilds,name='Play to Win')
-    channel = discord.utils.get(guild.text_channels,name='mr-o-status')
-    if not(args.TEST_MODE):
-        await channel.send('Mr. O just woke up from his nap.')
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('Logged in as {0} ({0.id})'.format(bot.user))
+        print('------')
+        if args.UPDATE_ALL:
+            self.update_all()
+        else:
+            print('Skipping Profile Updates')
+        guild = discord.utils.get(bot.guilds,name='Play to Win')
+        channel = discord.utils.get(guild.text_channels,name='mr-o-status')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        print('Profiles Updated Awaiting Commands')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        if not(args.TEST_MODE):
+            await channel.send('Mr. O just woke up from his nap.')
     
     
 
