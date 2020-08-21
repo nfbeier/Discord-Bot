@@ -11,6 +11,12 @@ from gtts import gTTS
 import h5py
 import time
 from datetime import datetime
+import argparse
+
+parser = argparse.ArgumentParser(description='Parses arguments')
+parser.add_argument('--TEST_MODE',type=int,default=0)
+args = parser.parse_args()
+
 # Suppress noise about console usage from errors
 ffmpeg_options = {
     'options': '-vn'
@@ -27,8 +33,13 @@ class intros(commands.Cog):
         self.players = h5py.File('settings/players.h5','a')
         self.owner_name = 'thadis'
         self.mutetime = time.time()
-        
-     #~~~~~~~~~~Bot Commands~~~~~~~~~~~
+        self.serversettings = {}
+        with h5py.File('serversettings.h5','r') as hf:
+            for key in hf.keys():
+                self.serversettings[key] = hf[key][...]
+        #await channel.send("Mr. O is well rested from his nap.")
+
+    #~~~~~~~~~~Bot Commands~~~~~~~~~~~
     #Commands directly interacting with the bot's settings.
     @commands.command()
     async def unmute(self,ctx):
@@ -56,7 +67,15 @@ class intros(commands.Cog):
     @commands.command()
     async def gotobed(self,ctx):
         """Turns Mr. O off."""
+        await ctx.message.delete()
         if ctx.author.name == 'thadis':
+  
+            
+            if not(args.TEST_MODE): 
+                guild = discord.utils.get(self.bot.guilds,name='Play to Win')
+                channel = discord.utils.get(guild.text_channels, name='mr-o-status')
+                await channel.send('Mr. O is sleepy sleep. Nighty night.')
+            time.sleep(0.5)
             await ctx.bot.logout()
    
     @commands.command()
@@ -937,6 +956,17 @@ class intros(commands.Cog):
             self.players[name+'/'+key][...] = old_settings[key]    
         '''
     @commands.Cog.listener()
+    async def on_message(self,message):
+        print(message.author)
+        guild = message.guild
+        if guild:
+            name = message.author.name
+            if name == self.owner_name:
+                with open('logs/%f.dat'%(guild.id),'a') as f:
+                    print("{0.created_at} : {0.author.name} : {0.content} : {0.attachments}".format(message),file=f)
+            await bot.process_commands(message)
+    
+    @commands.Cog.listener()
     async def on_member_update(self,before,after):
         if before.display_name != after.display_name:
             now = datetime.now()
@@ -948,9 +978,11 @@ class intros(commands.Cog):
 async def on_ready():
     print('Logged in as {0} ({0.id})'.format(bot.user))
     print('------')
-
-
-
+    guild = discord.utils.get(bot.guilds,name='Play to Win')
+    channel = discord.utils.get(guild.text_channels,name='mr-o-status')
+    if not(args.TEST_MODE):
+        await channel.send('Mr. O just woke up from his nap.')
+    
     
 
 
