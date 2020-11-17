@@ -16,6 +16,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Parses arguments')
 parser.add_argument('--TEST_MODE',type=int,default=0)
 parser.add_argument('--UPDATE_ALL',type=int,default=1)
+parser.add_argument('--DISABLE_WAKEUP',type=int,default=0)
 args = parser.parse_args()
 
 # Suppress noise about console usage from errors
@@ -36,7 +37,7 @@ class intros(commands.Cog):
         self.owner_name = 'thadis'
         self.mutetime = time.time()
         self.serversettings = {}
-        self.logging_channels = ['bot-lab']
+        self.logging_channels = ['bot-lab','voice_chat','general','smap','petchat']
         with h5py.File('settings/serversettings.h5','r') as hf:
             for key in hf.keys():
                 self.serversettings[key] = hf[key][...]
@@ -130,6 +131,28 @@ class intros(commands.Cog):
         return None               
     #~~~~~~~~~~~Player Profile Commands    
     @commands.command()
+    async def ignore_logging(self,ctx,channelName=''):
+        old_ignore = self.players[ctx.author.name+'/ignore_logging'][...]
+    
+        if channelName == 'RESET':
+            self.update_key(ctx.author.name,'ignore_logging',np.array('TEMP',dtype='S'))
+        elif not(channelName == '') and not(channelName in old_ignore):
+            self.update_key(ctx.author.name,'ignore_logging',np.append(old_ignore, channelName.encode()))
+           
+    @commands.command()
+    async def opt_in_list(self,ctx):
+        await ctx.message.delete()
+        templist = []
+        if self.owner_name == ctx.author.name:
+
+            for guild in self.bot.guilds:
+                for member in guild.members:
+                    if self.players[member.name + '/enable_logging'][...] == True:
+                        if not(member.name in templist):
+                            print(member.name + ' has enabled logging')
+                            templist.append(member.name)
+
+    @commands.command()
     async def opt_in(self,ctx):
         await ctx.message.delete()
         self.update_key(ctx.author.name,'enable_logging',True)
@@ -197,9 +220,9 @@ class intros(commands.Cog):
          
         modStatus = self.players[ctx.author.name + '/mod'][...]
         if status == 1:
-            print('in status==1')
+            #print('in status==1')
             if ctx.author.name == self.owner_name:
-                print('in if statement')
+             #   print('in if statement')
                 try:
      #               print(self.players[player.name + '/mod'][...])
                      self.update_key(player.name,'mod',1)
@@ -253,7 +276,7 @@ class intros(commands.Cog):
         message = '~~~~~\n'
         message += 'Nicknames for '+name + '\n'
         fileName = 'logs/nicknames/'+name.replace(' ','_') +'_nicknames_'+ctx.guild.name.replace(' ','_') + '.dat'
-        print(fileName,name)
+        #print(fileName,name)
         if os.path.exists(fileName):
             with open(fileName,'r') as f:
                 lines = f.readlines()
@@ -344,7 +367,7 @@ class intros(commands.Cog):
         """Inputs: <@player>optional"""
         await ctx.message.delete()
         player = self.find_name(ctx,playerID)
-        print(player.name)
+        #print(player.name)
         self.update_profile(player.name)
         player_settings = self.find_profile(ctx,playerID=playerID)       
         #print(player.keys())
@@ -368,7 +391,7 @@ class intros(commands.Cog):
         if len(audiofile) > 0:
             audiofile = audiofile[0]
             imagefile = audiofile.replace('audio/','images/').replace('.mp3','.png')
-            print(imagefile) 
+            #print(imagefile) 
             channel = self.find_voicechat(ctx)
         #print(after.channel,after)
        # print(channel) 
@@ -726,7 +749,7 @@ class intros(commands.Cog):
         
         await ctx.message.delete()
         player_settings = self.find_profile(ctx,playerID)
-        print('here')
+        #print('here')
         modStatus = self.is_mod(ctx.author.name) 
         name = self.find_name(ctx,playerID).name
         if playerID == None:
@@ -762,20 +785,23 @@ class intros(commands.Cog):
 
     
     def update_all(self):
-        print(self.bot.guilds)
+        #print(self.bot.guilds)
         for guild in self.bot.guilds:
             for member in guild.members:
                 print('Updating ' + member.name)
                 self.update_profile(member.name)
-
+                #self.update_key(member.name,'ignore_logging',np.array('TEMP',dtype='S'))
+ 
     @commands.command()
-    async def remove(self,ctx,playerID=None):
+    async def reset_profile(self,ctx,playerID=None):
         await ctx.message.delete()
-        print(self.is_mod(ctx.author.name))
+       # print(self.is_mod(ctx.author.name))
         if self.is_mod(ctx.author.name):
             name = self.find_name(ctx,playerID).name
-            print(name)
+        #    print(name)
             self.remove_profile(name)
+            self.update_profile(name)
+
 
     @commands.command()
     async def reset_nickname(self,ctx,playerID=None):
@@ -791,7 +817,7 @@ class intros(commands.Cog):
         if playerID != None:
             
             nickname = "".join(args[:])
-            print(nickname)
+            #print(nickname)
             name = self.find_name(ctx,playerID).name 
             author = self.find_name(ctx,None).name
 
@@ -862,16 +888,16 @@ class intros(commands.Cog):
     async def post_image(self,ctx,fileName):
         filelist = glob.glob('images/'+fileName)
         if len(filelist) > 0:
-            print(ctx.message.content)
+            #print(ctx.message.content)
             try:
                 await ctx.message.delete()
             except discord.errors.NotFound:
                 print('not found')
-            print(ctx.message.content)
+            #print(ctx.message.content)
             await ctx.send(file=discord.File(filelist[0]))
 
     async def post_gif(self, ctx,gifname,gifnum = -1):
-        print(gifnum) 
+        #print(gifnum) 
         giflist = glob.glob('gifs/'+gifname + '*.gif')
         gifnum = int(gifnum)
         if len(giflist)>0:
@@ -930,10 +956,14 @@ class intros(commands.Cog):
         self.create_key(name,'enable_play',1)
         self.create_key(name,'default_nickname',name) 
         self.create_key(name,'enable_logging',False) 
+        self.create_key(name,'ignore_logging',np.array('TEMP',dtype='S'))
         #print('New Proile Created for %s'%name)        
 
     def is_mod(self,name):
-        return self.players[name+'/mod'][...]
+        if self.owner_name == name:
+            return True
+        else:
+            return self.players[name+'/mod'][...]
 
     def user_settings(self,name):
         #returns all of the users settings in a dictionary
@@ -948,16 +978,22 @@ class intros(commands.Cog):
     #    await ctx.message.delete()
 
     def remove_profile(self,name):
-        print(name)
+        #print(name)
         del self.players[name]
 
     def update_profile(self,name):
         # Updates a profile to contain all new default settings.
         # Preserves all old keys
+        
+        print(name)
         self.create_profile('default')
-         
 
         for key in self.players['default'].keys():
+            print(key)
+         
+        print('Updated Profile for '+name)
+        for key in self.players['default'].keys():
+            print(name,'/',str(key))
             if name + '/' + key not in self.players:
                 if not(key =='/default_nickname'):
                     self.players[name+'/'+key] = self.players['default/'+key]
@@ -985,12 +1021,17 @@ class intros(commands.Cog):
         if guild:
             name = message.author.name
             #print(message.channel,self.logging_channels[0])    
-            if message.channel.name in self.logging_channels:
+         #   print(message.channel.name.encode() == self.players[name+'/ignore_logging'][...])
+            if message.channel.name in self.logging_channels and not(message.channel.name.encode() in self.players[name+'/ignore_logging'][...]):
             #    print('channel in logging_channel')
                 if self.players[name+'/enable_logging'][...]:
              #       print('message logged')
-                    with open('logs/%f.dat'%(guild.id),'a') as f:
-                        print("{0.created_at}\t{0.author.name}\t{0.channel}\t{0.content}\t{0.attachments}".format(message),file=f)
+                    if not(os.path.isfile('logs/%d.dat'%(guild.id))):
+                        with open('logs/%d.dat'%guild.id,'w') as f:
+                            print('created_at\tid\tguild\tauthor.name\tchannel\tchannel.id\tcontent\tattachments',file=f)
+
+                    with open('logs/%d.dat'%(guild.id),'a') as f:
+                        print(("{0.created_at}\t{0.id}\t{0.guild}\t{0.author.name}\t{0.channel}\t{0.channel.id}\t{0.content}\t{0.attachments}".format(message)).replace('\n','\\n'),file=f)
             #await bot.process_commands(message)
              
     @commands.Cog.listener()
@@ -1014,7 +1055,7 @@ class intros(commands.Cog):
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('Profiles Updated Awaiting Commands')
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        if not(args.TEST_MODE):
+        if not(args.TEST_MODE) and not(args.DISABLE_WAKEUP):
             await channel.send('Mr. O just woke up from his nap.')
     
     
