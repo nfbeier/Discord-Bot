@@ -1,7 +1,7 @@
 #ignore
-#audio/*
-#logs/*
-#settings/*
+audio/*
+logs/*
+settings/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
