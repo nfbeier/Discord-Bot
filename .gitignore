@@ -3,6 +3,11 @@ audio/*
 logs/*
 settings/*
 
+!audio/.gitkeep
+!logs/.gitkeep
+!settings/.gitkeep
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
