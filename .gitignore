@@ -2,7 +2,7 @@
 audio/*
 logs/*
 settings/*
-
+!settings/default_settings.dat
 !audio/.gitkeep
 !logs/.gitkeep
 !settings/.gitkeep

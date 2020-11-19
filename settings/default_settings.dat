@@ -1,0 +1,13 @@
+guild = None
+guild_id = None
+id = None
+name = None
+default_nickname = "nickname"
+volume = 0.01
+length = 3.0
+mod = 0
+ban = 0
+ban_count = 0
+custom_audio = 1
+audio_ratio = 0.5
+enable_logging = 0
