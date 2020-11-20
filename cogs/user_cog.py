@@ -48,9 +48,9 @@ class users(commands.Cog):
 
     def load_defaults(self, directory=None):
         if directory == None:
-            path = 'default_settings.dat'
+            path = 'user_defaults.dat'
         else:
-            path = directory + '/default_settings.dat'
+            path = directory + '/user_defaults.dat'
 
         if os.path.exists(path):
             with open(path,'r') as f:
@@ -62,22 +62,30 @@ class users(commands.Cog):
             for line in content:
                 if len(line) > 0:
                     a = line.split('=')
-                    if a[1] == 'None':
-                        dic[a[0]] = None
-                    elif '"' in a[1]:
-                        print(a[1])
-                        dic[a[0]] = a[1].replace('"','')
-                    elif '.' in a[1]:
-                        dic[a[0]] = float(a[1])
+                    varname = a[0]
+                    vartype = a[1].split(':')[0]
+                    varval = a[1].split(':')[1]
+                    
+
+
+                    if vartype == 'BOOL':
+                        dic[a[0]] = ('BOOL',bool(int(varval)))
+                    elif vartype == 'TEXT':
+                        dic[a[0]] = ('TEXT',varval.replace('"',"'"))
+                    elif vartype == 'FLOAT':
+                        dic[a[0]] = ('FLOAT',float(varval))
+                    elif vartype == 'BIGINT':
+                        dic[a[0]] = ('BIGINT',int(varval))
                     else:
                         try:
-                            dic[a[0]] = int(a[1])
+                            dic[a[0]] = ('BIGINT',int(varval))
                         except ValueError:
-                            dic[a[0]] = a[1]
+                            dic[a[0]] = ('TEXT',str(varval))
                     
             return dic
         else:
             return {}    
+        
         
     def load_settings(self,path=None):
         # TODO: Loads all settings into python dictionary

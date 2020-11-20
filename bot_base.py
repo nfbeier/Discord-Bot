@@ -22,6 +22,7 @@ from base_cog import base
 from audio_cog import audio
 from image_cog import images
 from user_cog import users
+from guild_cog import guilds
 
 #from profile_fun import load_settings
 #from profile_fun import load_defaults
@@ -69,6 +70,8 @@ async def run(TOKENS):
     bot.add_cog(users(bot))
     bot.add_cog(audio(bot))
     bot.add_cog(images(bot))
+    bot.add_cog(guilds(bot))
+
     print('Database: ',bot.db)
     try:
         await bot.start(TOKENS["DISCORD_TOKEN"])

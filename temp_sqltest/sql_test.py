@@ -14,11 +14,13 @@ async def run():
     await db.execute("INSERT INTO users(id, discord_id,name) VALUES (0, 1,'test_name');")
     await db.execute("INSERT INTO users(id, discord_id,name) VALUES (1, 5,'te');")
     await db.execute("INSERT INTO users(id, discord_id,name) VALUES (2, 7,'tt_name');")
+    key = ['id','discord_id']
 
-    test = await db.fetch("SELECT discord_id from users WHERE id>=1;")
+    test = await db.fetch("SELECT {0}, {1} from users;".format(*key))
     print(test)
-    for key in test:
-        print(key)
+    for ii in range(len(test)):
+        for key2 in key:
+            print(key,key2,test[ii][key2])
     await db.close()
     
 loop = asyncio.get_event_loop()
