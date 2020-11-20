@@ -48,9 +48,9 @@ class users(commands.Cog):
 
     def load_defaults(self, directory=None):
         if directory == None:
-            path = 'user_defaults.dat'
+            path = 'user_defaults.ini'
         else:
-            path = directory + '/user_defaults.dat'
+            path = directory + '/user_defaults.ini'
 
         if os.path.exists(path):
             with open(path,'r') as f:
