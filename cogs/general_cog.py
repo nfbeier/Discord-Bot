@@ -19,8 +19,7 @@ class general(commands.Cog):
     async def nicknames(self,ctx,playerID=None,length=5,directory='logs/nicknames/'):
         await ctx.message.delete()
         users = self.bot.get_cog('users')
-        member = pf.find_member(self.bot,ctx,playerID)
-
+        member = await users.find_supermember(ctx,playerID)
 
         message = '~~~~~\n'
         message += 'Nicknames for '+member.name + ' on Server ' + ctx.guild.name + '\n'

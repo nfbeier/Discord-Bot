@@ -44,12 +44,15 @@ class audio(commands.Cog):
             await self.play_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
     
     @commands.command()
-    async def upload_audio(self,ctx):
+    async def upload_audio(self,ctx,playerID=None):
+        users = self.bot.get_cog('users')
+        member = await users.find_supermember(ctx,playerID)
+            
         if ctx.message.attachments:
 
             print(ctx.message.attachments[0].filename)#,ctx.message['filename'].attachments)
             if ctx.message.attachments[0].filename[-4:] == '.mp3':
-                customfile  = 'custom_' + ctx.author.name +'_'+ str(ctx.author.id)+ '_'+ str(ctx.author.guild.id) +'.mp3'
+                customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
 
                 await ctx.message.attachments[0].save('audio/users/'+customfile)
                 

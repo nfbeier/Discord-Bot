@@ -12,7 +12,7 @@ def mention_to_user(guild,mention):
     return discord.utils.get(guild.members, id=mention_to_id(mention))
 
 def find_member(guild,ctx,mention):
-    print(mention)
+   # print(mention)
     if mention != None:
         member = mention_to_user(guild,mention)
     else:
@@ -20,6 +20,8 @@ def find_member(guild,ctx,mention):
     return member
 
 
+
+    
 def roll_dice(args):
     """Inputs: Dice roll represented in terms of XdY+AxB-Z"""  
     #await ctx.message.delete()

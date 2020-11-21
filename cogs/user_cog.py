@@ -21,11 +21,11 @@ class users(commands.Cog):
     async def reset_profile(self,ctx):
         # TODO: Resets the profile for a member to
         #       the default profile
-        dic = {'user_name':ctx.author.name,'guild_name':ctx.author.guild.name}
+        dic = {'user_name':member.name,'guild_name':member.guild.name}
         print('Reseting profile for {user_name} in {guild_name}'.format(**dic))
-
-        await self.delete_user(ctx.guild,ctx.author)
-        await self.generate_user(ctx.guild,ctx.author)
+        member = await self.find_supermember(ctx,playerID)
+        await self.delete_user(ctx.guild,member)
+        await self.generate_user(ctx.guild,member)
         
     @commands.command()  
     async def test_update(self,ctx):
@@ -35,48 +35,48 @@ class users(commands.Cog):
     
     @commands.command()
     async def default_nickname(self, ctx, nickname, playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await self.set_value(ctx.author.guild,member,'default_nickname',nickname)
         await ctx.send('Default Nickname set from %s to %s for %s'%(oldNickname,nickname,member.name))    
     
     @commands.command()
     async def reset_nickname(self, ctx, playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         print(member,type(member))
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await member.edit(nick=str(oldNickname))
         await ctx.send('Nickname reset to %s for %s'%(oldNickname,member.name))
     @commands.command()
     async def volume(self, ctx,volume: float,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         oldVolume = await self.pull_value(ctx.author.guild,member,'volume')
         await self.set_value(ctx.author.guild,member,'volume',volume)
         await ctx.send('Volume set from %0.3f to %0.3f for %s'%(oldVolume,volume,member.name))
            
     @commands.command()
     async def custom_audio(self, ctx,custom_audio: float,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         oldcustom_audio = await self.pull_value(ctx.author.guild,member,'custom_audio')
         await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio)
         await ctx.send('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio,member.name))
         
     @commands.command()
     async def length(self, ctx,length: float,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         oldLength = await self.pull_value(ctx.author.guild,member,'length')
         await self.set_value(ctx.author.guild,member,'length',length)
         await ctx.send('Length set from %0.3f to %0.3f for %s'%(oldLength,length,member.name))
         
     @commands.command()
     async def solo_play(self,ctx,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         val = await self.pull_value(ctx.author.guild,member,'solo_play')
         await self.set_value(ctx.author.guild,member,'solo_play',val==0)
         
     @commands.command()
     async def unify_settings(self,ctx,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
 
         mainRow = await self.bot.db.fetchrow("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(ctx.author.guild.id,member.id))
 
@@ -91,10 +91,9 @@ class users(commands.Cog):
             
     @commands.command()
     async def settings(self,ctx,playerID=None):
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        member = await self.find_supermember(ctx,playerID)
         settings = await self.pull_user(ctx.author.guild,member)
-        print(settings)
-        string = '```\nSettings for %s on %s\n'%(ctx.author.name,ctx.author.guild)
+        string = '```\nSettings for %s on %s\n'%(member.name,ctx.author.guild)
         maxKey = 0
         for key in dict(settings):
             curKey = len(key)
@@ -109,6 +108,9 @@ class users(commands.Cog):
         
         await ctx.author.send(string)
         #await self.set_value(ctx.author.guild,member,'solo_play',val==0)
+        
+    async def check_super(self,guild,member):
+        return await self.pull_value(guild,member,'superuser')
         
     async def set_value(self,guild,member,key,value):
         dic = {'guild_id':guild.id,'user_id':member.id,'key':key,'value':value,'user_name':member.name,'guild_name':guild.name}
@@ -151,7 +153,15 @@ class users(commands.Cog):
     async def check_all(self,guild_list):
         for guild in guild_list:
             await self.check_guild(guild)
-
+            
+    async def find_supermember(self,ctx,playerID):
+        supercheck = await self.check_super(ctx.author.guild,ctx.author)
+        
+        if supercheck:
+            member = pf.find_member(ctx.author.guild,ctx,playerID)
+        else:
+            member = pf.find_member(ctx.author.guild,ctx,None)
+        return member
 
     def load_defaults(self, directory=None):
         if directory == None:
