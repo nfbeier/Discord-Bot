@@ -1,7 +1,10 @@
 from discord.ext import commands
 import os
 import discord
+import sys
 
+sys.path.append('functions')
+import profile_fun as pf
 
 class images(commands.Cog):
     def __init__(self, bot):

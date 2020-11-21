@@ -4,7 +4,7 @@ import glob
 import argparse
 
 import os
-
+print('Generating image_cog.py')
 #os.chdir(r'G:\Users\mstan\git\discord_bot')
 parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
 parser.add_argument('--basepath', type=str,default='cogs/cog_base')
@@ -15,9 +15,30 @@ args = parser.parse_args()
 
 pathList = glob.glob(args.imagepath + '*.png')
 fileList = []
+longestLen = 0
+lengths = []
 for idx in range(len(pathList)):
     fileList.append(pathList[idx].replace('\\','/').split('/')[-1][0:-4].lower())
-print(fileList)
+    lengths.append(len(fileList[idx]))
+    if len(fileList[idx]) > longestLen:
+        longestLen = len(fileList[idx])
+
+message = '       Images added to image_cog       '
+displayStr = ''
+displayStr +='\n' + '-'*len(message)
+displayStr +='\n' + message
+displayStr +='\n' + '-'*len(message) + '\n'
+
+
+for ii in range(len(fileList)):
+    displayStr += fileList[ii]
+    if (ii+1)%5==0:
+        displayStr += '\n'
+    else:
+        displayStr += ' '*(int((longestLen-lengths[ii]))+3)
+        
+displayStr +='\n' + '-'*len(message) + '\n'
+
 string = ''
 
 #string += "from discord.ext import commands\n\n\n\nclass images(commands.Cog):\n\tdef __init__(self, bot):\n\t\tprint('Cog Loaded: images')\n\t\tself.bot = bot"
@@ -31,3 +52,4 @@ for idx in range(len(fileList)):
 string = string.replace('\t','    ') 
 with open('cogs/image_cog.py','w') as f:
     print(string,file=f)
+print(displayStr)

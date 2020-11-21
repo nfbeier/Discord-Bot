@@ -17,14 +17,15 @@ from discord.ext import commands
 
 
 sys.path.append('cogs')
-sys.path.append('functions')
 from base_cog import base
 from audio_cog import audio
 from image_cog import images
 from user_cog import users
 from guild_cog import guilds
+from general_cog import general
 
-#from profile_fun import load_settings
+sys.path.append('functions')
+import profile_fun as pf
 #from profile_fun import load_defaults
 
 load_dotenv()
@@ -68,6 +69,7 @@ async def run(TOKENS):
 
     bot.add_cog(base(bot))
     bot.add_cog(users(bot))
+    bot.add_cog(general(bot))
     bot.add_cog(audio(bot))
     bot.add_cog(images(bot))
     bot.add_cog(guilds(bot))

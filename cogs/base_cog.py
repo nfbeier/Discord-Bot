@@ -1,8 +1,13 @@
 from discord.ext import commands
 import discord
 import sys
-#from profile_fun import *
 import os
+print(os.getcwd())
+sys.path.append('functions')
+import profile_fun as pf
+
+#from profile_fun import *
+
 import asyncio
 class base(commands.Cog):
     #Base function mainly interact through listeners and responding to server events.
@@ -12,7 +17,8 @@ class base(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def disconnect(self,ctx):
+    @commands.is_owner()
+    async def shutdown(self,ctx):
         users = self.bot.get_cog('users')
         superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
         if superuser:

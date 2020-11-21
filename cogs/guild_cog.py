@@ -1,6 +1,8 @@
 from discord.ext import commands
 import os
-
+import sys
+sys.path.append('functions')
+import profile_fun as pf
 
 
 class guilds(commands.Cog):
