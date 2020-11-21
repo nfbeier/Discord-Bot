@@ -7,6 +7,8 @@ cogs/image_cog.py
 !settings/default_settings.dat
 !audio/.gitkeep
 !logs/.gitkeep
+!logs/nicknames/.gitkeep
+
 !settings/.gitkeep
 !images/.gitkeep
 

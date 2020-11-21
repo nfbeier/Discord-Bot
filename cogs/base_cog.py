@@ -5,7 +5,7 @@ import os
 print(os.getcwd())
 sys.path.append('functions')
 import profile_fun as pf
-
+from datetime import datetime
 #from profile_fun import *
 
 import asyncio
@@ -60,10 +60,10 @@ class base(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self,before,after):
         if before.display_name != after.display_name:
-            print('Need to complete')
-            print('Was %s now %s'%(before.display_name,after.display_name))
-            print('Name: ',after.name)
-            print('id: ', after.id)
+            now = datetime.now()
+            timestr = now.strftime('%Y/%m/%d  %H:%M:%S')
+            with open('logs/nicknames/' + after.name.replace(' ','_') + '_nicknames_' +after.guild.name.replace(' ','_') +'.dat','a') as f:
+                f.write(timestr+'\t'+before.display_name + '\t' + after.display_name +'\n')
             # TODO: audio nickname update
 
             # TODO: append nickname log

@@ -29,9 +29,9 @@ class audio(commands.Cog):
         except ValueError:
             custom_audio = 0.5
 
-        print(playerID)
-        member = pf.find_member(self.bot,ctx,playerID)
-        print(member)
+       # print(playerID)
+        member = pf.find_member(ctx.author.guild,ctx,playerID)
+       # print(member)
         channel = self.find_voicechat(ctx)
         
         users = self.bot.get_cog('users')
