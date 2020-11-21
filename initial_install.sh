@@ -1,8 +1,8 @@
 #!/bin/bash
 
 sudo apt install ffmpeg
-conda create --name=discord python=3.6
-source activate discord
+conda create --name=discordTest python=3.6
+source activate discordTest
 pip install -U "discord.py[voice]"
 pip install python-dotenv
 pip install numpy
