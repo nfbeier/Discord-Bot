@@ -2,12 +2,12 @@
 audio/*
 logs/*
 settings/*
-images/*.png
+images/*
 !settings/default_settings.dat
 !audio/.gitkeep
 !logs/.gitkeep
 !settings/.gitkeep
-
+!images/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
