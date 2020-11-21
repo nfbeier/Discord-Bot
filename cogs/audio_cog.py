@@ -42,13 +42,24 @@ class audio(commands.Cog):
         audio_enabled = await users.pull_value(ctx.author.guild,ctx.author,'audio_enabled')
         if audio_enabled:
             await self.play_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
-
-        
     
+    @commands.command()
+    async def upload_audio(self,ctx):
+        if ctx.message.attachments:
+
+            print(ctx.message.attachments[0].filename)#,ctx.message['filename'].attachments)
+            if ctx.message.attachments[0].filename[-4:] == '.mp3':
+                customfile  = 'custom_' + ctx.author.name +'_'+ str(ctx.author.id)+ '_'+ str(ctx.author.guild.id) +'.mp3'
+
+                await ctx.message.attachments[0].save('audio/users/'+customfile)
+                
+                
     async def play_audio(self, channel, member, volume,length,custom_audio, solo_play=0):
         if len(channel.members) > 1 or solo_play:
             default_audio = np.random.random() > custom_audio
-            
+            if default_audio:
+                volume = 0.5
+                
             audioFile = self.find_member_audio(member,default_audio)
                 
             voice = await channel.connect(timeout=1.0)
@@ -71,8 +82,10 @@ class audio(commands.Cog):
             
     def find_member_audio(self,member,default_audio,directory='audio/users/'):
         audiofile = ''
-        customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '.mp3'
-        defaultfile = 'default_' + member.display_name +'_'+ str(member.id)+ '.mp3'
+        
+        customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+        defaultfile = 'default_' + member.display_name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+        
         text = member.display_name
         if not(default_audio):
             if os.path.isfile(directory + customfile):
