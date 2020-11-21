@@ -130,16 +130,3 @@ class users(commands.Cog):
         else:
             return {}    
         
-        
-    def load_settings(self,path=None):
-        # TODO: Loads all settings into python dictionary
-        if os.path.exists(path):
-            print('a')
-      
-
-    def create_file(self,path=None):
-        if path == None:
-            path = 'settings.h5'
-        with h5py.File('settings.h5','w') as hf:
-            # TODO: add what happens on load
-            temp = 1

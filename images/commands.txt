@@ -1,0 +1,155 @@
+	@commands.command()
+	async def airhorn(self, ctx)
+		await self.post_image(ctx, 'airhorn.png')
+
+
+	@commands.command()
+	async def banhammer(self, ctx)
+		await self.post_image(ctx, 'banhammer.png')
+
+
+	@commands.command()
+	async def basard(self, ctx)
+		await self.post_image(ctx, 'basard.png')
+
+
+	@commands.command()
+	async def Caprese(self, ctx)
+		await self.post_image(ctx, 'Caprese.png')
+
+
+	@commands.command()
+	async def ColdOne(self, ctx)
+		await self.post_image(ctx, 'ColdOne.png')
+
+
+	@commands.command()
+	async def commandmaker(self, ctx)
+		await self.post_image(ctx, 'commandmaker.py')
+
+
+	@commands.command()
+	async def commands(self, ctx)
+		await self.post_image(ctx, 'commands.txt')
+
+
+	@commands.command()
+	async def drift(self, ctx)
+		await self.post_image(ctx, 'drift.png')
+
+
+	@commands.command()
+	async def fact(self, ctx)
+		await self.post_image(ctx, 'fact.png')
+
+
+	@commands.command()
+	async def Friendship(self, ctx)
+		await self.post_image(ctx, 'Friendship.png')
+
+
+	@commands.command()
+	async def gitgud(self, ctx)
+		await self.post_image(ctx, 'gitgud.jpg')
+
+
+	@commands.command()
+	async def guillotine(self, ctx)
+		await self.post_image(ctx, 'guillotine.png')
+
+
+	@commands.command()
+	async def gungan(self, ctx)
+		await self.post_image(ctx, 'gungan.png')
+
+
+	@commands.command()
+	async def HanzMeter(self, ctx)
+		await self.post_image(ctx, 'HanzMeter.png')
+
+
+	@commands.command()
+	async def Heirloom(self, ctx)
+		await self.post_image(ctx, 'Heirloom.jpg')
+
+
+	@commands.command()
+	async def icon_xl(self, ctx)
+		await self.post_image(ctx, 'icon_xl.png')
+
+
+	@commands.command()
+	async def kataki27(self, ctx)
+		await self.post_image(ctx, 'kataki27.png')
+
+
+	@commands.command()
+	async def letsgochamp(self, ctx)
+		await self.post_image(ctx, 'letsgochamp.png')
+
+
+	@commands.command()
+	async def meowdy(self, ctx)
+		await self.post_image(ctx, 'meowdy.png')
+
+
+	@commands.command()
+	async def nice(self, ctx)
+		await self.post_image(ctx, 'nice.png')
+
+
+	@commands.command()
+	async def RolfO(self, ctx)
+		await self.post_image(ctx, 'RolfO.png')
+
+
+	@commands.command()
+	async def salt(self, ctx)
+		await self.post_image(ctx, 'salt.png')
+
+
+	@commands.command()
+	async def Same(self, ctx)
+		await self.post_image(ctx, 'Same.png')
+
+
+	@commands.command()
+	async def same2(self, ctx)
+		await self.post_image(ctx, 'same2.jpeg')
+
+
+	@commands.command()
+	async def soup(self, ctx)
+		await self.post_image(ctx, 'soup.png')
+
+
+	@commands.command()
+	async def thiscodyassmotherfucker(self, ctx)
+		await self.post_image(ctx, 'thiscodyassmotherfucker.png')
+
+
+	@commands.command()
+	async def trash(self, ctx)
+		await self.post_image(ctx, 'trash.png')
+
+
+	@commands.command()
+	async def tuffin(self, ctx)
+		await self.post_image(ctx, 'tuffin.png')
+
+
+	@commands.command()
+	async def WIN(self, ctx)
+		await self.post_image(ctx, 'WIN.png')
+
+
+	@commands.command()
+	async def yougotta(self, ctx)
+		await self.post_image(ctx, 'yougotta.png')
+
+
+	@commands.command()
+	async def zoeyell(self, ctx)
+		await self.post_image(ctx, 'zoeyell.png')
+
+
