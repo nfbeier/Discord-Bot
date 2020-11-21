@@ -16,19 +16,17 @@ class base(commands.Cog):
         print('Cog Loaded: base')
         self.bot = bot
 
+
     @commands.command()
     @commands.is_owner()
     async def shutdown(self,ctx):
+        '''Shuts bot down. Only usable by bot owner'''
         users = self.bot.get_cog('users')
         superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
         if superuser:
             await self.bot.logout()
 
-    @commands.command()
-    @commands.is_owner()
-    async def create_superuser(self,ctx):
-        users = self.bot.get_cog('users')
-        await users.set_value(ctx.author.guild,ctx.author,'superuser',True)
+
 
 
     @commands.Cog.listener()

@@ -13,38 +13,34 @@ class audio(commands.Cog):
     def __init__(self, bot):
         print('Cog Loaded: audio')
         self.bot = bot
-   
-        
-    @commands.command()
-    async def audio_test(self,ctx):
-        """Re-enables Mr. O's playing intro songs."""
-        await ctx.send('Audio work')
 
     @commands.command()
-    async def play(self,ctx,playerID=None,custom_audio = 0.5):
+    async def play(self,ctx,playerID=None,custom_audio = None):
+        '''Plays a persons intro song. If !play is followed by @mention plays another users audio. If @mention is follow by number it overrides the users normal custom_audio setting.'''
         await ctx.message.delete()
-        
-        try:
-            custom_audio = float(custom_audio)
-        except ValueError:
-            custom_audio = 0.5
+        users = self.bot.get_cog('users')
+        member = pf.find_member(ctx.author.guild,ctx,playerID)
+
+        if custom_audio == None:
+            custom_audio = await users.pull_value(ctx.author.guild,member,'custom_audio')
+        else:
+            try:
+                custom_audio = float(custom_audio)
+            except ValueError:
+                custom_audio = 0.5
 
        # print(playerID)
-        member = pf.find_member(ctx.author.guild,ctx,playerID)
        # print(member)
         channel = self.find_voicechat(ctx)
         
-        users = self.bot.get_cog('users')
 
         volume = await users.pull_value(ctx.author.guild,member,'volume')
         length = await users.pull_value(ctx.author.guild,member,'length')
-        solo_play = True
-        audio_enabled = await users.pull_value(ctx.author.guild,ctx.author,'audio_enabled')
-        if audio_enabled:
-            await self.user_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
+        await self.user_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=True)
  
     @commands.command()
     async def say(self,ctx,*args):
+        '''Text-to-speech of whatever is said after !say command'''
         await ctx.message.delete()
         string = ''
         for part in args:
@@ -58,6 +54,7 @@ class audio(commands.Cog):
             
     @commands.command()
     async def upload_audio(self,ctx,playerID=None):
+        '''Upload custom audio track for intro. If .mp3 file is attached it will be associated with your account'''
         users = self.bot.get_cog('users')
         member = await users.find_supermember(ctx,playerID)
             
@@ -81,6 +78,7 @@ class audio(commands.Cog):
 
             
     async def play_audio(self,channel,audioFile,volume=0.5,length=3):
+        if self.bot.voice_clients == []:
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(audioFile),volume=volume)
             voice.play(source,after=lambda e: print('player error: %s' %e) if e else None)

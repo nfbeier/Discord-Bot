@@ -12,11 +12,14 @@ class general(commands.Cog):
 
     @commands.command()
     async def roll(self,ctx,*args):
+        '''Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2'''
         await ctx.send(pf.roll_dice(args))
         
     
     @commands.command()
-    async def nicknames(self,ctx,playerID=None,length=5,directory='logs/nicknames/'):
+    async def nicknames(self,ctx,playerID=None,length=5):
+        '''Displays users past nicknames on server. !nicknames @<mention> <length>. @<mention> only works for superusers'''
+        directory='logs/nicknames/'
         await ctx.message.delete()
         users = self.bot.get_cog('users')
         member = await users.find_supermember(ctx,playerID)

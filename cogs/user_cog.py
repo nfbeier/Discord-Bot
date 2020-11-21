@@ -10,17 +10,17 @@ class users(commands.Cog):
         print('Cog Loaded: users')
         self.bot = bot
         
-        
-        
     @commands.command()
-    async def users_test(self,ctx):
-        """Re-enables Mr. O's playing intro songs."""
-        await ctx.send('Users work')
+    @commands.is_owner()
+    async def create_superuser(self,ctx, playerID=None, value=True):
+        '''Promotes user to superuser. Only usable by bot owner'''
+        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        await self.set_value(ctx.author.guild,member,'superuser',bool(value))
         
     @commands.command()  
     async def reset_profile(self,ctx):
-        # TODO: Resets the profile for a member to
-        #       the default profile
+        '''Resets all profile settings to defaults a given server'''
+
         dic = {'user_name':member.name,'guild_name':member.guild.name}
         print('Reseting profile for {user_name} in {guild_name}'.format(**dic))
         member = await self.find_supermember(ctx,playerID)
@@ -29,12 +29,11 @@ class users(commands.Cog):
         
     @commands.command()  
     async def test_update(self,ctx):
-        # TODO: Resets the profile for a member to
-        #       the default profile
         await self.bot.db.execute("UPDATE users SET default_nickname = 'changed name' WHERE guild_id = %d AND user_id = %d;"%(ctx.guild.id,ctx.author.id))
     
     @commands.command()
     async def default_nickname(self, ctx, nickname, playerID=None):
+        '''Sets default nickname of users. !default_nickname "<nickname>" @<mention>. @<mention> only works for superusers'''
         member = await self.find_supermember(ctx,playerID)
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await self.set_value(ctx.author.guild,member,'default_nickname',nickname)
@@ -42,6 +41,8 @@ class users(commands.Cog):
     
     @commands.command()
     async def reset_nickname(self, ctx, playerID=None):
+        '''Resets nickname of users to default value. !reset_nickname @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         print(member,type(member))
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
@@ -49,6 +50,8 @@ class users(commands.Cog):
         await ctx.send('Nickname reset to %s for %s'%(oldNickname,member.name))
     @commands.command()
     async def volume(self, ctx,volume: float,playerID=None):
+        '''Sets volume of users to included value. !volume <value> @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         oldVolume = await self.pull_value(ctx.author.guild,member,'volume')
         await self.set_value(ctx.author.guild,member,'volume',volume)
@@ -56,6 +59,8 @@ class users(commands.Cog):
            
     @commands.command()
     async def custom_audio(self, ctx,custom_audio: float,playerID=None):
+        '''Sets rate of playing custom audio intro of users to included value. !custom_audio <value> @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         oldcustom_audio = await self.pull_value(ctx.author.guild,member,'custom_audio')
         await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio)
@@ -63,6 +68,8 @@ class users(commands.Cog):
         
     @commands.command()
     async def length(self, ctx,length: float,playerID=None):
+        '''Sets length of custom audio intro of users to included value. !length <value> @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         oldLength = await self.pull_value(ctx.author.guild,member,'length')
         await self.set_value(ctx.author.guild,member,'length',length)
@@ -70,12 +77,16 @@ class users(commands.Cog):
         
     @commands.command()
     async def solo_play(self,ctx,playerID=None):
+        '''Sets if intro plays if only user on voice channel. !solo_play <value> @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         val = await self.pull_value(ctx.author.guild,member,'solo_play')
         await self.set_value(ctx.author.guild,member,'solo_play',val==0)
         
     @commands.command()
     async def unify_settings(self,ctx,playerID=None):
+        '''Sets all other server settings to current servers settings. !unify_settings @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
 
         mainRow = await self.bot.db.fetchrow("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(ctx.author.guild.id,member.id))
@@ -91,6 +102,8 @@ class users(commands.Cog):
             
     @commands.command()
     async def settings(self,ctx,playerID=None):
+        '''Sends settings for current server. !settings @<mention>. @<mention> only works for superusers'''
+
         member = await self.find_supermember(ctx,playerID)
         settings = await self.pull_user(ctx.author.guild,member)
         string = '```\nSettings for %s on %s\n'%(member.name,ctx.author.guild)
