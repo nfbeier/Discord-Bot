@@ -5,7 +5,7 @@ from discord.ext import commands
 
 class images(commands.Cog):
     def __init__(self, bot):
-        print('images cog loaded')
+        print('Cog Loaded: images')
         self.bot = bot
         
     @commands.command()

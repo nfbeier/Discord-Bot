@@ -3,19 +3,46 @@ import discord
 import sys
 #from profile_fun import *
 import os
-
+import asyncio
 class base(commands.Cog):
     #Base function mainly interact through listeners and responding to server events.
     #Functions responding to messasges/user inputs will go into the more specific cogs.
     def __init__(self,bot):
-        print('base cog loaded')
+        print('Cog Loaded: base')
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self,member: discord.Member, before, after):
-        a = 1
-        # TODO: Implement 
+    @commands.command()
+    async def disconnect(self,ctx):
+        users = self.bot.get_cog('users')
+        superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
+        if superuser:
+            await self.bot.logout()
 
+    @commands.command()
+    @commands.is_owner()
+    async def create_superuser(self,ctx):
+        users = self.bot.get_cog('users')
+        await users.set_value(ctx.author.guild,ctx.author,'superuser',True)
+
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self,member: discord.Member, before,after):
+        users = self.bot.get_cog('users')
+        audio = self.bot.get_cog('audio')
+
+        volume = await users.pull_value(member.guild,member,'volume')
+        length = await users.pull_value(member.guild,member,'length')
+        custom_audio = await users.pull_value(member.guild,member,'custom_audio')
+        solo_play = await users.pull_value(member.guild,member,'solo_play')
+        audio_enabled = await users.pull_value(member.guild,member,'audio_enabled')
+
+        if audio_enabled:
+            if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
+                await audio.play_audio(channel=after.channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
+
+
+    
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         guild = message.guild
@@ -36,6 +63,11 @@ class base(commands.Cog):
             # TODO: append nickname log
 
     @commands.Cog.listener()
+    async def on_member_join(self,member):
+        users = self.bot.get_cog('users')
+        await users.check_member(member.guild,member)
+        
+    @commands.Cog.listener()
     async def on_ready(self):
         on_ready_message = 'Logged in as {0} ({0.id})'.format(self.bot.user)
         print('-'*len(on_ready_message))
@@ -45,23 +77,13 @@ class base(commands.Cog):
         users = self.bot.get_cog('users')
         guilds = self.bot.get_cog('guilds')
 
-        #print(users)
-        print(users)
+
         if users is not None:
-            print(os.getcwd())
 
-
-                
-          #  await self.bot.db.execute('DROP TABLE IF EXISTS users;')
-          #  await self.bot.db.execute('DROP TABLE IF EXISTS guild;')
 
             user_default = users.load_defaults(directory='settings')
             user_string = await self.build_table(table_name = 'users',settings = user_default)
-
-
-          #  await self.bot.db.execute("INSERT INTO users (guild_id,guild_name,ban) VALUES (10,'thisguild',True);")
-           # await self.bot.db.execute("INSERT INTO users (guild_id,guild_name,ban) VALUES (5,'otherguild',False);")
-
+            
 
         if guilds is not None:
             guild_default = guilds.load_defaults(directory='settings')
@@ -69,33 +91,30 @@ class base(commands.Cog):
                 table_name = 'guild_' +guild.name + '_' + str(guild.id)
                 table_name = table_name.replace(' ','_')
                 guild_string = await self.build_table(table_name = table_name,settings = guild_default)
-            #await self.bot.db.execute("INSERT INTO %s (guild_id,guild_name) VALUES (5,'otherguild');"%table_name)
-
-
-
-       # if users is not None:
-            #users.update_all(self.bot.guilds)
-
-           # print(users.load_defaults('settings'))
+                
+        await users.check_all(self.bot.guilds)
+        
+        done_message = '                 Bot Loaded                 '
+        print('-'*len(done_message))
+        print(done_message)
+        print('-'*len(done_message))       
+        
            
-           
+     
     async def build_table(self,table_name,settings):
         db_string = "CREATE TABLE IF NOT EXISTS %s(id SERIAL"%table_name
         print('Building table: %s'%table_name)
+        
         for key in settings.keys():
-        # print(user_string)
-        # user_string += ', %s %s'%(str(key),str(default[key][0]))
-
             db_string += ', %s %s DEFAULT %s'%(str(key),str(settings[key][0]),str(settings[key][1]))
         db_string += ');'
         await self.bot.db.execute(db_string)
         testRow = await self.bot.db.fetchrow("SELECT * FROM %s"%table_name)
-        print(testRow)
         if testRow == None:
             await self.bot.db.execute("INSERT INTO %s DEFAULT VALUES;"%table_name)
-            testRow = await self.bot.db.fetchrow("SELECT * FROM %s"%table_name)
-        #print(table_name)
-        #print(table_name,testRow.keys())
+            testRow = await self.bot.db.fetchrow("SELECT * FROM %s;"%table_name)
+            await self.bot.db.execute("DELETE FROM %s WHERE id = 1;"%table_name)
+
         
         tableKeys = []
         for key in testRow.keys():

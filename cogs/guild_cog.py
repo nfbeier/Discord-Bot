@@ -5,10 +5,8 @@ import os
 
 class guilds(commands.Cog):
     def __init__(self, bot):
-        print('users cog loaded')
+        print('Cog Loaded: guilds')
         self.bot = bot
-
-
 
     def load_defaults(self, directory=None):
         if directory == None:

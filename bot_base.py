@@ -72,7 +72,7 @@ async def run(TOKENS):
     bot.add_cog(images(bot))
     bot.add_cog(guilds(bot))
 
-    print('Database: ',bot.db)
+    print('Using Database: ',bot.db)
     try:
         await bot.start(TOKENS["DISCORD_TOKEN"])
     except KeyboardInterrupt:
