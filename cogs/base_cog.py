@@ -44,7 +44,7 @@ class base(commands.Cog):
 
         if audio_enabled:
             if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == 'Mr. O') and self.bot.voice_clients == []:
-                await audio.play_audio(channel=after.channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
+                await audio.user_audio(channel=after.channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
 
 
     

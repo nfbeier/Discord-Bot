@@ -41,8 +41,21 @@ class audio(commands.Cog):
         solo_play = True
         audio_enabled = await users.pull_value(ctx.author.guild,ctx.author,'audio_enabled')
         if audio_enabled:
-            await self.play_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
-    
+            await self.user_audio(channel=channel,member=member,volume=volume,length=length,custom_audio=custom_audio,solo_play=solo_play)
+ 
+    @commands.command()
+    async def say(self,ctx,*args):
+        await ctx.message.delete()
+        string = ''
+        for part in args:
+            string += part
+            string += ' '
+        channel = self.find_voicechat(ctx)
+        print(args,string)
+        filePath = 'audio/clips/say.mp3'
+        self.generate_audio(string,filePath)
+        await self.play_audio(channel,filePath,volume=0.5,length=3)
+            
     @commands.command()
     async def upload_audio(self,ctx,playerID=None):
         users = self.bot.get_cog('users')
@@ -57,20 +70,23 @@ class audio(commands.Cog):
                 await ctx.message.attachments[0].save('audio/users/'+customfile)
                 
                 
-    async def play_audio(self, channel, member, volume,length,custom_audio, solo_play=0):
+    async def user_audio(self, channel, member, volume,length,custom_audio, solo_play=0):
         if len(channel.members) > 1 or solo_play:
             default_audio = np.random.random() > custom_audio
             if default_audio:
                 volume = 0.5
                 
             audioFile = self.find_member_audio(member,default_audio)
-                
+            await self.play_audio(channel,audioFile,volume,length) 
+
+            
+    async def play_audio(self,channel,audioFile,volume=0.5,length=3):
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(audioFile),volume=volume)
             voice.play(source,after=lambda e: print('player error: %s' %e) if e else None)
             await asyncio.sleep(length)
             await voice.disconnect()
- 
+            
     def find_voicechat(self,ctx):
         for channel in ctx.guild.voice_channels:
             for member in channel.members:
