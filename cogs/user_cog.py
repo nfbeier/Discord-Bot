@@ -47,13 +47,19 @@ class users(commands.Cog):
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await member.edit(nick=str(oldNickname))
         await ctx.send('Nickname reset to %s for %s'%(oldNickname,member.name))
-        
     @commands.command()
     async def volume(self, ctx,volume: float,playerID=None):
         member = pf.find_member(ctx.author.guild,ctx,playerID)
         oldVolume = await self.pull_value(ctx.author.guild,member,'volume')
         await self.set_value(ctx.author.guild,member,'volume',volume)
         await ctx.send('Volume set from %0.3f to %0.3f for %s'%(oldVolume,volume,member.name))
+           
+    @commands.command()
+    async def custom_audio(self, ctx,custom_audio: float,playerID=None):
+        member = pf.find_member(ctx.author.guild,ctx,playerID)
+        oldcustom_audio = await self.pull_value(ctx.author.guild,member,'custom_audio')
+        await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio)
+        await ctx.send('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio,member.name))
         
     @commands.command()
     async def length(self, ctx,length: float,playerID=None):
