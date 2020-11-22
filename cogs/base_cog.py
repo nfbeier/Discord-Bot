@@ -88,11 +88,13 @@ class base(commands.Cog):
             user_default = users.load_defaults(directory='settings')
             user_string = await self.build_table(table_name = 'users',settings = user_default)
             
-
+        print('Done with users')
         if guilds is not None:
             guild_default = guilds.load_defaults(directory='settings')
             for guild in self.bot.guilds:
-                table_name = 'guild_' +guild.name + '_' + str(guild.id)
+                print(guild.name)
+                table_name = 'guild_' + str(guild.id)
+            
                 table_name = table_name.replace(' ','_')
                 guild_string = await self.build_table(table_name = table_name,settings = guild_default)
                 
