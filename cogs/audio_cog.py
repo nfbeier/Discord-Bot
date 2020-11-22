@@ -50,8 +50,26 @@ class audio(commands.Cog):
         print(args,string)
         filePath = 'audio/clips/say.mp3'
         self.generate_audio(string,filePath)
-        await self.play_audio(channel,filePath,volume=0.5,length=3)
-            
+        await self.play_audio(channel,filePath,volume=0.5,length=5)
+           
+ 
+    @commands.command()
+    async def say_in(self,ctx,lang,*args):
+        '''Text-to-speech of whatever is said after !say command'''
+        await ctx.message.delete()
+        string = ''
+        for part in args:
+            string += part
+            string += ' '
+        channel = self.find_voicechat(ctx)
+        print(args,string)
+        filePath = 'audio/clips/say.mp3'
+        try:
+            self.generate_audio(string,filePath,lang)
+            await self.play_audio(channel,filePath,volume=0.5,length=3)
+        except ValueError:
+            a = 1
+
     @commands.command()
     async def upload_audio(self,ctx,playerID=None):
         '''Upload custom audio track for intro. If .mp3 file is attached it will be associated with your account'''
@@ -92,8 +110,8 @@ class audio(commands.Cog):
                     return channel
         return None    
         
-    def generate_audio(self,text,path):        
-        myobj = gTTS(text=text,lang='en',slow=False)
+    def generate_audio(self,text,path,lang='en'):        
+        myobj = gTTS(text=text,lang=lang,slow=False)
         myobj.save(path)
             
             

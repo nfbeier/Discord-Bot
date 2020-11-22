@@ -1,4 +1,5 @@
 from discord.ext import commands
+import numpy as np
 import os
 import sys
 sys.path.append('functions')
@@ -72,6 +73,10 @@ class users(commands.Cog):
 
         member = await self.find_supermember(ctx,playerID)
         oldLength = await self.pull_value(ctx.author.guild,member,'length')
+        superuser = await self.check_super(ctx.author.guild,member)
+        #print(length)
+        if not(superuser):
+            length = np.min((length,3.0))    
         await self.set_value(ctx.author.guild,member,'length',length)
         await ctx.send('Length set from %0.3f to %0.3f for %s'%(oldLength,length,member.name))
         
