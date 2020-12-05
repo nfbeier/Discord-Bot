@@ -66,6 +66,13 @@ class base(commands.Cog):
 
             # TODO: append nickname log
 
+            print('Generating Audio for %s to say %s'%(after.name,after.display_name))
+            defaultfile = 'default_' + after.name +'_'+ str(after.id)+ '_'+ str(after.guild.id) +'.mp3'
+                  
+            audio = self.bot.get_cog('audio')
+            audio.generate_audio(after.display_name,'audio/users/'+defaultfile)
+
+
     @commands.Cog.listener()
     async def on_member_join(self,member):
         users = self.bot.get_cog('users')
@@ -80,7 +87,7 @@ class base(commands.Cog):
         # TODO: check for users without a profile
         users = self.bot.get_cog('users')
         guilds = self.bot.get_cog('guilds')
-
+        audio = self.bot.get_cog('audio')
 
         if users is not None:
 
@@ -97,9 +104,16 @@ class base(commands.Cog):
             
                 table_name = table_name.replace(' ','_')
                 guild_string = await self.build_table(table_name = table_name,settings = guild_default)
-                
+                            
+                for member in guild.members:
+                    print('Generating Audio for %s to say %s'%(member.name,member.display_name))
+                    defaultfile = 'default_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+                    
+                    audio.generate_audio(member.display_name,'audio/users/'+defaultfile)
+
         await users.check_all(self.bot.guilds)
-        
+
+            
         done_message = '                 Bot Loaded                 '
         print('-'*len(done_message))
         print(done_message)

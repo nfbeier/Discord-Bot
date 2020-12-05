@@ -128,7 +128,7 @@ class audio(commands.Cog):
             elif os.path.isfile(directory + defaultfile):
                 audiofile = defaultfile
             else:
-                audiofile = defaultfile
+             
                 self.generate_audio(text,directory+audiofile)
         else:
             audiofile = defaultfile
